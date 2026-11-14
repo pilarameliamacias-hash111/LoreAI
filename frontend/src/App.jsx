@@ -12,6 +12,7 @@ import CrearCapitulo from './pages/CrearCapitulo'
 import SigueLeyendo from "./components/SigueLeyendo";
 import RecomendadoParaTi from "./components/RecomendadoParaTi";
 import LeerHistoria from './pages/LeerHistoria'
+import HistoriasPopulares from './components/HistoriasPopulares'
 
 
 function App() {
@@ -522,10 +523,8 @@ setHistoriaEnEdicionId(null)
   </>
 )}
 
-  {/* POPULARES */}
-  <div className="seccion-populares">
-    <h2>Historias populares</h2>
-  </div>
+{/* HISTORIAS POPULARES */}
+<HistoriasPopulares />
 
   {/* OFERTAS */}
   <div className="seccion-ofertas">

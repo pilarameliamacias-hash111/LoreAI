@@ -1,0 +1,227 @@
+
+/* =================================
+   HISTORIAS POPULARES - LOREAI
+================================= */
+
+.seccion-populares {
+  max-width: 1250px;
+  margin: 65px auto 0;
+  padding: 35px 25px;
+  border-top: 1px solid #d9eeee;
+  text-align: left;
+}
+
+.seccion-populares > h2 {
+  color: #398f96;
+  font-family: Arial, sans-serif;
+  font-size: 28px;
+  text-align: center;
+  margin: 0 0 30px;
+}
+
+.contenedor-carrusel-populares {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.carrusel-populares {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: #20b2aa #e8f7f7;
+}
+
+.pista-populares {
+  display: flex;
+  gap: 20px;
+  padding: 12px 4px 20px;
+  width: max-content;
+}
+
+.tarjeta-popular {
+  flex: 0 0 260px;
+  width: 260px;
+  scroll-snap-align: start;
+}
+
+.flecha-carrusel {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #20b2aa;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.flecha-carrusel:hover {
+  background: #168f89;
+  transform: scale(1.08);
+}
+
+@media (max-width: 600px) {
+  .contenedor-carrusel-populares {
+    gap: 5px;
+  }
+
+  .tarjeta-popular {
+    flex-basis: 230px;
+    width: 230px;
+  }
+
+  .flecha-carrusel {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+}
+.tarjeta-popular {
+  min-width: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #d9eeee;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(40, 150, 160, 0.09);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tarjeta-popular:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(40, 150, 160, 0.15);
+}
+
+.portada-popular {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: #edf8f8;
+}
+
+.contenido-popular {
+  padding: 18px;
+}
+
+.puesto-popular {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #20a69f;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.contenido-popular h3 {
+  margin: 0 0 12px;
+  color: #287d83;
+  font-size: 19px;
+  overflow-wrap: anywhere;
+}
+
+.descripcion-popular {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+.descripcion-popular.expandida {
+  display: block;
+  overflow: visible;
+}
+
+.boton-ver-mas {
+  margin: 10px 0 15px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #168f91;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.boton-ver-mas:hover {
+  text-decoration: underline;
+}
+
+.generos-popular {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 13px;
+}
+
+.generos-popular span {
+  display: inline-block;
+  padding: 6px 11px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.genero-principal {
+  background: #20b2aa;
+  color: white;
+}
+
+.genero-secundario {
+  background: #d9f2ff;
+  color: #367b9c;
+}
+
+.categoria-popular {
+  margin: 0 0 7px;
+  color: #82969b;
+  font-size: 12px;
+}
+
+.autor-popular {
+  margin: 0;
+  color: #526c79;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* ADAPTACIÓN RESPONSIVE */
+
+@media (max-width: 900px) {
+  .rejilla-populares {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .seccion-populares {
+    margin-top: 45px;
+    padding: 25px 10px;
+  }
+
+  .seccion-populares > h2 {
+    font-size: 24px;
+  }
+
+  .rejilla-populares {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .tarjeta-popular {
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
