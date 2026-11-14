@@ -1,0 +1,204 @@
+
+/* SECCIÓN DE CONTACTO */
+
+.seccion-contacto {
+  width: 100%;
+  padding: 70px 20px;
+  background: linear-gradient(135deg, #e9fbfb, #f5ffff);
+  display: flex;
+  justify-content: center;
+}
+
+.contenido-contacto {
+  width: 100%;
+  max-width: 650px;
+  text-align: center;
+}
+
+.contenido-contacto h2 {
+  color: #168f89;
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.texto-contacto {
+  color: #526b70;
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+/* FORMULARIO */
+
+.formulario-contacto {
+  background: white;
+  padding: 35px;
+  border-radius: 18px;
+  box-shadow: 0 5px 20px rgba(32, 178, 170, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.formulario-contacto label {
+  color: #287d7b;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.formulario-contacto input,
+.formulario-contacto select,
+.formulario-contacto textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #c8e7e6;
+  border-radius: 9px;
+  background: #fbffff;
+  color: #354f53;
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.formulario-contacto input:focus,
+.formulario-contacto select:focus,
+.formulario-contacto textarea:focus {
+  border-color: #20b2aa;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.12);
+}
+
+.formulario-contacto textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.formulario-contacto button {
+  margin-top: 15px;
+  padding: 13px;
+  border: none;
+  border-radius: 25px;
+  background: #20b2aa;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.formulario-contacto button:hover {
+  background: #168f89;
+  transform: translateY(-2px);
+}
+
+.confirmacion-contacto {
+  color: #168f89;
+  background: #e9fafa;
+  border-radius: 10px;
+  padding: 14px;
+  line-height: 1.5;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* DISEÑO PARA CELULARES */
+
+@media (max-width: 600px) {
+  .seccion-contacto {
+    padding: 45px 15px;
+  }
+
+  .contenido-contacto h2 {
+    font-size: 1.6rem;
+  }
+
+  .formulario-contacto {
+    padding: 22px;
+  }
+}
+
+
+/* CORREO Y REDES SOCIALES */
+
+.redes-contacto {
+  margin-top: 35px;
+  text-align: center;
+}
+
+.redes-contacto h3 {
+  color: #168f89;
+  font-size: 1.3rem;
+  margin-bottom: 22px;
+}
+
+.correo-contacto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 25px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(32, 178, 170, 0.10);
+}
+
+.icono-contacto {
+  font-size: 28px;
+  color: #20b2aa;
+}
+
+.correo-contacto strong,
+.red-social strong {
+  color: #287d7b;
+}
+
+.correo-contacto p,
+.red-social p {
+  margin: 4px 0 0;
+  color: #526b70;
+  font-size: 0.9rem;
+}
+
+.lista-redes-contacto {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.red-social {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(32, 178, 170, 0.08);
+  text-align: left;
+}
+
+.red-social > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #e4f8f7;
+  color: #168f89;
+  font-size: 21px;
+  font-weight: bold;
+}
+
+.aviso-redes {
+  margin-top: 18px;
+  color: #789194;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 500px) {
+  .lista-redes-contacto {
+    grid-template-columns: 1fr;
+  }
+}

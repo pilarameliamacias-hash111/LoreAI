@@ -13,6 +13,7 @@ import SigueLeyendo from "./components/SigueLeyendo";
 import RecomendadoParaTi from "./components/RecomendadoParaTi";
 import LeerHistoria from './pages/LeerHistoria'
 import HistoriasPopulares from './components/HistoriasPopulares'
+import Contacto from './components/Contacto'
 
 
 function App() {
@@ -566,9 +567,12 @@ setHistoriaEnEdicionId(null)
 
 </section>
 
-      <footer className="pie-loreai">
-        2026 LoreAI · Encontramos la estrella y la ayudamos a brillar. 
-      </footer>
+{/* FORMULARIO DE CONTACTO */}
+<Contacto />
+
+<footer className="pie-loreai">
+  2026 LoreAI · Encontramos la estrella y la ayudamos a brillar.
+</footer>
 
 {mostrarAcceso && (
   <Acceso
@@ -580,14 +584,14 @@ setHistoriaEnEdicionId(null)
         setMostrarConsola(true)
       }
 
-      
       setDestinoDespuesAcceso(null)
-   setMostrarAcceso(false)
- }}
+      setMostrarAcceso(false)
+    }}
   />
 )}
 
 </main>
+
 )}
 
 
