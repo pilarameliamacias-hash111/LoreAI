@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Consola | LoreAI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main id="consola">
+
+    <header class="cabecera-consola">
+
+        <a href="index.html" class="logo-loreai">
+            <img
+                src="./imágenes/descarga__1_-removebg-preview.png"
+                alt="LoreAI - Inicio"
+            >
+        </a>
+
+        <div class="titulo-consola">
+            <h1>Mi Consola </h1>
+            <p>Tu espacio para imaginar, crear y organizar tus historias.</p>
+        </div>
+
+    </header>
+
+    <section id="biblioteca-historias">
+
+        <div class="encabezado-biblioteca">
+            <div>
+                <h2>MI BIBLIOTECA</h2>
+                <p>Todas tus historias, reunidas en un solo lugar.</p>
+            </div>
+
+            <button type="button" id="abrir-modal-crear">
+                + Crear historia
+            </button>
+        </div>
+
+        <div id="mis-historias">
+
+            <p id="mensaje-vacio">
+                Todavía no has creado ninguna historia.
+                ¡Tu próxima aventura puede comenzar aquí! ✨
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- MODAL PARA CREAR O EDITAR HISTORIAS -->
+
+<div id="modal-historia" class="modal-historia" hidden>
+
+    <div class="fondo-modal" id="cerrar-modal-fondo"></div>
+
+    <section
+        class="contenido-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-editor"
+    >
+
+        <div class="encabezado-modal">
+            <div>
+                <h2 id="titulo-editor">Crear una historia nueva </h2>
+                <p>Añade información a tu obra.</p>
+            </div>
+
+            <button
+                type="button"
+                id="cerrar-modal"
+                aria-label="Cerrar ventana"
+            >
+                ×
+            </button>
+        </div>
+
+        <div class="formulario-historia">
+
+            <label for="titulo">Título de tu historia:</label>
+            <input
+                type="text"
+                id="titulo"
+                placeholder="Escribe el título..."
+            >
+
+            <label for="descripcion">¿De qué trata?</label>
+            <textarea
+                id="descripcion"
+                placeholder="Cuéntanos de qué trata tu historia..."
+            ></textarea>
+
+            <label for="etiquetas">Etiquetas de tu historia:</label>
+            <input
+                type="text"
+                id="etiquetas"
+                placeholder="Escribe una etiqueta y pulsa Enter..."
+            >
+
+            <div id="lista-etiquetas"></div>
+
+            <label for="idioma">Idioma de la historia:</label>
+            <select id="idioma">
+                <option value="Español">Español</option>
+                <option value="Inglés">Inglés</option>
+                <option value="Japonés">Japonés</option>
+                <option value="Otro">Otro</option>
+            </select>
+
+            <label for="genero">Género:</label>
+            <select id="genero">
+                <option value="">Selecciona un género</option>
+                <option value="Fantasía">Fantasía</option>
+                <option value="Romance">Romance</option>
+                <option value="Aventura">Aventura</option>
+                <option value="Misterio">Misterio</option>
+                <option value="Ciencia ficción">Ciencia ficción</option>
+                <option value="Terror">Terror</option>
+                <option value="Drama">Drama</option>
+                <option value="Comedia">Comedia</option>
+                <option value="Fanfiction">Fanfiction</option>
+                <option value="Otro">Otro</option>
+            </select>
+
+            <label for="genero-secundario">Género secundario:</label>
+            <select id="genero-secundario">
+                <option value="">Selecciona un género</option>
+                <option value="Fantasía">Fantasía</option>
+                <option value="Romance">Romance</option>
+                <option value="Aventura">Aventura</option>
+                <option value="Misterio">Misterio</option>
+                <option value="Ciencia ficción">Ciencia ficción</option>
+                <option value="Terror">Terror</option>
+                <option value="Drama">Drama</option>
+                <option value="Comedia">Comedia</option>
+                <option value="Fanfiction">Fanfiction</option>
+                <option value="Otro">Otro</option>
+            </select>
+
+            <label for="edad">Público recomendado:</label>
+            <select id="edad">
+                <option value="">Selecciona una categoría</option>
+                <option value="Todas las edades">Todas las edades</option>
+                <option value="13+">13+</option>
+                <option value="16+">16+</option>
+                <option value="18+">18+</option>
+            </select>
+
+            <label for="portada-archivo">
+                Subir portada desde tu dispositivo:
+            </label>
+            <input
+                type="file"
+                id="portada-archivo"
+                accept="image/*"
+            >
+
+            <label for="portada-url">
+                O pegar el enlace de una portada:
+            </label>
+            <input
+                type="url"
+                id="portada-url"
+                placeholder="https://ejemplo.com/portada.jpg"
+            >
+
+            <div class="acciones-formulario">
+
+                <button type="button" id="crear">
+                    Crear historia
+                </button>
+
+                <button
+                    type="button"
+                    id="cancelar-edicion"
+                >
+                    Cancelar
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script src="consola.js"></script>
+
+</body>
+</html>

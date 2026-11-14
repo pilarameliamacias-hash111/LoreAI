@@ -1,0 +1,203 @@
+
+.perfil-publico {
+    width: 100%;
+    min-height: 100vh;
+    padding: 25px;
+    box-sizing: border-box;
+    background: #ffffff;
+    color: #252525;
+    font-family: Arial, sans-serif;
+}
+
+.volver-perfil {
+    margin-bottom: 20px;
+    padding: 9px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #e8fafa;
+    color: #187f85;
+    cursor: pointer;
+}
+
+.cabecera-perfil-publico {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.portada-publica {
+    width: 100%;
+    height: 230px;
+    overflow: hidden;
+    border-radius: 15px;
+    background: #d9f3f2;
+}
+
+.portada-publica img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.datos-principales-publicos {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-top: -55px;
+    padding: 0 25px;
+    position: relative;
+}
+
+.foto-publica {
+    width: 125px;
+    height: 125px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 5px solid white;
+    border-radius: 50%;
+    background: #bcebea;
+    font-size: 40px;
+}
+
+.foto-publica img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nombre-y-acciones {
+    flex: 1;
+    padding-top: 55px;
+}
+
+.nombre-y-acciones h1 {
+    margin: 0 0 15px;
+    font-size: 27px;
+}
+
+.acciones-perfil {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.acciones-perfil button {
+    padding: 9px 13px;
+    border: 1px solid #b8dddd;
+    border-radius: 8px;
+    background: white;
+    color: #287f83;
+    cursor: pointer;
+}
+
+.acciones-perfil button:hover {
+    background: #e8fafa;
+}
+
+.menu-perfil-contenedor {
+    position: relative;
+}
+
+.menu-perfil-publico {
+    position: absolute;
+    top: 42px;
+    right: 0;
+    z-index: 5;
+    width: 210px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 4px 15px #00000018;
+}
+
+.menu-perfil-publico button {
+    display: block;
+    width: 100%;
+    border: none;
+    text-align: left;
+}
+
+.estadisticas-perfil {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 30px 0;
+}
+
+.estadisticas-perfil button {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 110px;
+    padding: 13px 18px;
+    border: 1px solid #d9eeee;
+    border-radius: 10px;
+    background: #f7fdfd;
+    color: #333;
+    cursor: pointer;
+}
+
+.estadisticas-perfil strong {
+    font-size: 20px;
+    color: #25888b;
+}
+
+.navegacion-perfil-publico {
+    display: flex;
+    gap: 12px;
+    max-width: 1100px;
+    margin: 25px auto 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.navegacion-perfil-publico button {
+    padding: 13px 17px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #555;
+    cursor: pointer;
+}
+
+.navegacion-perfil-publico button.activa {
+    border-bottom-color: #36a5a5;
+    color: #21888b;
+    font-weight: bold;
+}
+
+.contenido-perfil-publico {
+    max-width: 1100px;
+    margin: 25px auto;
+    line-height: 1.6;
+}
+
+.contenido-perfil-publico h2 {
+    margin-top: 25px;
+    color: #278b8e;
+}
+
+.obras-publicas article {
+    margin: 12px 0;
+    padding: 15px;
+    border: 1px solid #e1eeee;
+    border-radius: 10px;
+}
+
+@media (max-width: 650px) {
+    .datos-principales-publicos {
+        align-items: flex-start;
+        flex-direction: column;
+        margin-top: -45px;
+    }
+
+    .nombre-y-acciones {
+        padding-top: 0;
+    }
+
+    .portada-publica {
+        height: 160px;
+    }
+}

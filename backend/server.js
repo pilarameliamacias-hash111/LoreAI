@@ -1,0 +1,1912 @@
+
+const express = require("express");
+const crypto = require("crypto");
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+const session = require("express-session");
+
+const archivoEntorno = path.join(__dirname, ".env");
+
+if (fs.existsSync(archivoEntorno)) {
+    process.loadEnvFile(archivoEntorno);
+}
+
+if (!process.env.SESSION_SECRET) {
+    throw new Error("Falta SESSION_SECRET en la configuración del backend.");
+}
+
+const app = express();
+app.disable("etag");
+app.use("/backend", (req, res) => {
+    res.sendStatus(404);
+});
+app.use(express.static(path.join(__dirname, "..")));
+const PORT = 3000;
+const archivoDatos = path.join(__dirname, "historias.json");
+const archivoUsuarios = path.join(__dirname, "usuarios.json");
+const archivoConversaciones = path.join(
+    __dirname,
+    "conversaciones.json"
+);
+function cargarUsuarios() {
+    try {
+        const contenido = fs.readFileSync(archivoUsuarios, "utf8");
+        return JSON.parse(contenido);
+    } catch (error) {
+        console.error("Error al leer usuarios:", error);
+        return [];
+    }
+}
+
+function guardarUsuarios(usuarios) {
+    const contenido = JSON.stringify(usuarios, null, 2);
+    fs.writeFileSync(archivoUsuarios, contenido, "utf8");
+}
+
+function cargarConversaciones() {
+    try {
+        if (!fs.existsSync(archivoConversaciones)) {
+            fs.writeFileSync(
+                archivoConversaciones,
+                "[]",
+                "utf8"
+            );
+        }
+
+        return JSON.parse(
+            fs.readFileSync(archivoConversaciones, "utf8")
+        );
+    } catch (error) {
+        console.error("Error al leer conversaciones:", error);
+        return [];
+    }
+}
+
+function guardarConversaciones(conversaciones) {
+    fs.writeFileSync(
+        archivoConversaciones,
+        JSON.stringify(conversaciones, null, 2),
+        "utf8"
+    );
+}
+
+function buscarUsuarioExistente(usuarios, usuario, correo) {
+    return usuarios.find(function(cuenta) {
+        return cuenta.usuario.toLowerCase() === usuario.toLowerCase()
+            || cuenta.correo.toLowerCase() === correo.toLowerCase();
+    });
+}
+
+app.use(cors({
+    origin: function (origin, callback) {
+       const permitidos = [
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+];
+        if (!origin || permitidos.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error("Origen no permitido."));
+    },
+    credentials: true
+}));
+
+app.use(express.json({ limit: "5mb" }));
+
+app.use(session({
+    name: "loreai.sid",
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 2
+    }
+}));
+
+
+function cargarHistorias() {
+    try {
+        if (!fs.existsSync(archivoDatos)) {
+            fs.writeFileSync(archivoDatos, "[]", "utf8");
+        }
+
+        return JSON.parse(
+            fs.readFileSync(archivoDatos, "utf8")
+        );
+    } catch (error) {
+        console.error("Error al leer historias:", error);
+        return [];
+    }
+}
+
+function guardarHistorias(historias) {
+    fs.writeFileSync(
+        archivoDatos,
+        JSON.stringify(historias, null, 2),
+        "utf8"
+    );
+}
+
+app.get("/", (req, res) => {
+    res.json({
+        mensaje: "¡El backend de LoreAI está funcionando!",
+        estado: "activo"
+    });
+});
+
+app.get("/api/historias", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión para ver tus historias."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const misHistorias = historias.filter(
+    historia =>
+        historia.creador === req.session.usuarioId &&
+        !historia.enPapelera
+);
+
+    res.json(misHistorias);
+});
+
+// Obtener las historias de la papelera
+app.get("/api/papelera", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión para ver la papelera."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+const ahora = Date.now();
+const treintaDias = 30 * 24 * 60 * 60 * 1000;
+
+// Eliminar definitivamente las historias que superaron los 30 días
+const historiasVigentes = historias.filter(historia => {
+    if (!historia.enPapelera || !historia.fechaEliminacion) {
+        return true;
+    }
+
+    const fechaEliminacion = new Date(historia.fechaEliminacion).getTime();
+
+    return !Number.isNaN(fechaEliminacion) &&
+        ahora - fechaEliminacion <= treintaDias;
+});
+
+guardarHistorias(historiasVigentes);
+
+const misHistoriasEnPapelera = historiasVigentes.filter(
+    historia =>
+        historia.creador === req.session.usuarioId &&
+        historia.enPapelera === true
+);
+
+res.json(misHistoriasEnPapelera);
+});
+
+// Restaurar una historia desde la papelera
+app.post("/api/papelera/:id/restaurar", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indice = historias.findIndex(
+        historia =>
+            historia.id === req.params.id &&
+            historia.creador === req.session.usuarioId &&
+            historia.enPapelera === true
+    );
+
+    if (indice === -1) {
+        return res.status(404).json({
+            error: "No encontramos esta historia en tu papelera."
+        });
+    }
+
+    historias[indice].enPapelera = false;
+    historias[indice].fechaEliminacion = null;
+
+    try {
+        guardarHistorias(historias);
+
+        res.json({
+            mensaje: "¡La historia se restauró correctamente!"
+        });
+    } catch (error) {
+        console.error("Error al restaurar historia:", error);
+
+        res.status(500).json({
+            error: "No se pudo restaurar la historia."
+        });
+    }
+});
+
+// Eliminar definitivamente una historia de la papelera
+app.delete("/api/papelera/:id", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indice = historias.findIndex(
+        historia =>
+            historia.id === req.params.id &&
+            historia.creador === req.session.usuarioId &&
+            historia.enPapelera === true
+    );
+
+    if (indice === -1) {
+        return res.status(404).json({
+            error: "No encontramos esta historia en tu papelera."
+        });
+    }
+
+    historias.splice(indice, 1);
+
+    try {
+        guardarHistorias(historias);
+
+        res.json({
+            mensaje: "La historia se eliminó definitivamente."
+        });
+    } catch (error) {
+        console.error("Error al eliminar historia:", error);
+
+        res.status(500).json({
+            error: "No se pudo eliminar la historia."
+        });
+    }
+});
+
+// OBTENER UNA HISTORIA POR SU ID
+app.get("/api/historias/:id", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+const historias = cargarHistorias();
+
+const historia = historias.find(h =>
+    h.id === req.params.id &&
+    h.creador === req.session.usuarioId &&
+    !h.enPapelera
+);
+
+    if (!historia) {
+        return res.status(404).json({
+            error: "No se encontró la historia."
+        });
+    }
+
+    const usuarios = cargarUsuarios();
+
+const cuentaAutor = usuarios.find(
+    usuario => usuario.id === historia.creador
+);
+
+const perfilAutor = cuentaAutor?.perfil || {};
+
+const historiaConAutor = {
+    ...historia,
+
+    autor: cuentaAutor ? {
+        id: cuentaAutor.id,
+        usuario: cuentaAutor.usuario,
+        nombrePublico: perfilAutor.nombrePublico || cuentaAutor.usuario,
+        fotoPerfil: perfilAutor.fotoPerfil || null
+    } : null
+};
+
+res.json(historiaConAutor);
+});
+
+app.post("/api/historias", (req, res) => {
+    if (!req.session.usuarioId) {
+    return res.status(401).json({
+        error: "Debes iniciar sesión para crear una historia."
+    });
+}
+    const {
+        titulo,
+        descripcion,
+        etiquetas,
+        genero,
+        generoSecundario,
+        publico,
+        categoria,
+        colaborando,
+        portada
+    } = req.body;
+
+    if (!titulo || !titulo.trim()) {
+        return res.status(400).json({
+            error: "La historia necesita un título."
+        });
+    }
+
+    if (!Array.isArray(etiquetas) || etiquetas.length > 10) {
+        return res.status(400).json({
+            error: "Las etiquetas deben ser una lista de máximo 10 elementos."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const nuevaHistoria = {
+        id: Date.now().toString(),
+        titulo: titulo.trim(),
+        descripcion: descripcion || "",
+        etiquetas,
+        idioma: "Español",
+        genero: genero || "",
+        generoSecundario: generoSecundario || "",
+        publico: publico || "",
+        categoria: categoria || "",
+        colaborando: Boolean(colaborando),
+        capitulos: [],
+        portada: portada || "",
+        estado: "borrador",
+        creador: req.session.usuarioId,
+        fechaCreacion: new Date().toISOString()
+    };
+
+    historias.push(nuevaHistoria);
+    guardarHistorias(historias);
+
+    res.status(201).json(nuevaHistoria);
+});
+
+app.put("/api/historias/:id", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión para editar una historia."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indice = historias.findIndex(
+        historia =>
+            historia.id === req.params.id &&
+            historia.creador === req.session.usuarioId
+            && !historia.enPapelera
+    );
+
+    if (indice === -1) {
+        return res.status(404).json({
+            error: "No encontramos esta historia en tu cuenta."
+        });
+    }
+
+    const {
+        titulo,
+        descripcion,
+        etiquetas,
+        genero,
+        generoSecundario,
+        publico,
+        categoria,
+        colaborando,
+        portada,
+        estadoHistoria,
+        tipoSaga,
+        detalleSaga
+    } = req.body;
+
+    if (typeof titulo !== "string" || !titulo.trim()) {
+        return res.status(400).json({
+            error: "La historia necesita un título."
+        });
+    }
+
+    if (typeof descripcion !== "string") {
+        return res.status(400).json({
+            error: "La descripción no es válida."
+        });
+    }
+
+    if (!Array.isArray(etiquetas) || etiquetas.length > 10) {
+        return res.status(400).json({
+            error: "Puedes utilizar un máximo de 10 etiquetas."
+        });
+    }
+
+    const historiaActual = historias[indice];
+
+    historias[indice] = {
+        ...historiaActual,
+        titulo: titulo.trim(),
+        descripcion,
+        etiquetas,
+        genero: genero || "",
+        generoSecundario: generoSecundario || "",
+        publico: publico || "",
+        categoria: categoria || "",
+        colaborando: Boolean(colaborando),
+        portada: portada || "",
+        estadoHistoria: estadoHistoria || "Historia en emisión",
+        tipoSaga: tipoSaga || "No",
+        detalleSaga: detalleSaga || ""
+    };
+
+    try {
+        guardarHistorias(historias);
+
+        res.json({
+            mensaje: "¡Los cambios se guardaron correctamente!",
+            historia: historias[indice]
+        });
+    } catch (error) {
+        console.error("Error al guardar historia:", error);
+
+        res.status(500).json({
+            error: "No se pudieron guardar los cambios."
+        });
+    }
+});
+
+
+app.delete("/api/historias/:id", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indice = historias.findIndex(historia =>
+        historia.id === req.params.id &&
+        historia.creador === req.session.usuarioId &&
+        !historia.enPapelera
+    );
+
+    if (indice === -1) {
+        return res.status(404).json({
+            error: "No encontramos esta historia."
+        });
+    }
+
+    historias[indice].enPapelera = true;
+    historias[indice].fechaEliminacion = new Date().toISOString();
+
+    guardarHistorias(historias);
+
+    res.json({
+        mensaje: "La historia se movió a la papelera."
+    });
+});
+
+
+
+/* ============================= */
+/*        CAPÍTULOS LOREAI       */
+/* ============================= */
+
+// Documento vacío compatible con Tiptap
+function documentoVacio() {
+    return {
+        type: "doc",
+        content: [
+            {
+                type: "paragraph",
+                content: []
+            }
+        ]
+    };
+}
+
+// Convierte capítulos antiguos (texto) al formato JSON
+function normalizarContenido(contenido) {
+    if (
+        contenido &&
+        typeof contenido === "object" &&
+        contenido.type === "doc" &&
+        Array.isArray(contenido.content)
+    ) {
+        return contenido;
+    }
+
+    if (typeof contenido === "string" && contenido.trim()) {
+        return {
+            type: "doc",
+            content: [
+                {
+                    type: "paragraph",
+                    content: [
+                        {
+                            type: "text",
+                            text: contenido
+                        }
+                    ]
+                }
+            ]
+        };
+    }
+
+    return documentoVacio();
+}
+
+// Comprueba que el documento tenga una estructura básica válida
+function esDocumentoValido(contenido) {
+    return (
+        contenido &&
+        typeof contenido === "object" &&
+        contenido.type === "doc" &&
+        Array.isArray(contenido.content)
+    );
+}
+
+// Busca una historia y verifica que pertenezca al usuario conectado
+function buscarHistoriaPropia(historias, historiaId, usuarioId) {
+    return historias.findIndex(historia =>
+        historia.id === historiaId &&
+        historia.creador === usuarioId
+    );
+}
+
+function buscarHistoriaActiva(historias, historiaId, usuarioId) {
+    return historias.findIndex(historia =>
+        historia.id === historiaId &&
+        historia.creador === usuarioId &&
+        !historia.enPapelera
+    );
+}
+
+
+// OBTENER CAPÍTULOS
+app.get("/api/historias/:id/capitulos", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indice = buscarHistoriaActiva(
+        historias,
+        req.params.id,
+        req.session.usuarioId
+    );
+
+    if (indice === -1) {
+        return res.status(404).json({
+            error: "No se encontró la historia."
+        });
+    }
+
+    const capitulos = (historias[indice].capitulos || []).map(c => ({
+    ...c,
+    estado: c.estado === "publicado" ? "publicado" : "borrador",
+    contenido: normalizarContenido(c.contenido),
+    recursos: c.recursos || []
+}));
+
+    res.json(capitulos);
+});
+
+
+// CREAR CAPÍTULO
+app.post("/api/historias/:id/capitulos", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indice = buscarHistoriaPropia(
+        historias,
+        req.params.id,
+        req.session.usuarioId
+    );
+
+    if (indice === -1) {
+        return res.status(404).json({
+            error: "No se encontró la historia."
+        });
+    }
+
+    const titulo = typeof req.body.titulo === "string"
+        ? req.body.titulo.trim()
+        : "";
+
+    const contenido = req.body.contenido ?? documentoVacio();
+
+    if (!titulo) {
+        return res.status(400).json({
+            error: "El capítulo necesita un título."
+        });
+    }
+
+    if (!esDocumentoValido(contenido)) {
+        return res.status(400).json({
+            error: "El contenido del capítulo no tiene un formato válido."
+        });
+    }
+
+    const fechaActual = new Date().toISOString();
+
+    const nuevoCapitulo = {
+        id: crypto.randomUUID(),
+        titulo,
+        contenido,
+        recursos: [],
+        estado: "borrador",
+        fechaCreacion: fechaActual,
+        ultimaEdicion: fechaActual
+    };
+
+    if (!Array.isArray(historias[indice].capitulos)) {
+        historias[indice].capitulos = [];
+    }
+
+    historias[indice].capitulos.push(nuevoCapitulo);
+
+    guardarHistorias(historias);
+
+    res.status(201).json(nuevoCapitulo);
+});
+
+// PUBLICAR O DEVOLVER UN CAPÍTULO A BORRADOR
+app.patch(
+    "/api/historias/:id/capitulos/:capituloId/estado",
+    (req, res) => {
+        if (!req.session.usuarioId) {
+            return res.status(401).json({
+                error: "Debes iniciar sesión."
+            });
+        }
+
+        const { estado } = req.body;
+
+        if (!["borrador", "publicado"].includes(estado)) {
+            return res.status(400).json({
+                error: "El estado solicitado no es válido."
+            });
+        }
+
+        const historias = cargarHistorias();
+
+        const indiceHistoria = buscarHistoriaActiva(
+            historias,
+            req.params.id,
+            req.session.usuarioId
+        );
+
+        if (indiceHistoria === -1) {
+            return res.status(404).json({
+                error: "No se encontró la historia."
+            });
+        }
+
+        const historia = historias[indiceHistoria];
+
+        const capitulo = (historia.capitulos || []).find(
+            c => c.id === req.params.capituloId
+        );
+
+        if (!capitulo) {
+            return res.status(404).json({
+                error: "No se encontró el capítulo."
+            });
+        }
+
+        capitulo.estado = estado;
+
+        if (estado === "publicado") {
+            capitulo.fechaPublicacion = new Date().toISOString();
+        } else {
+            capitulo.fechaPublicacion = null;
+        }
+
+        try {
+            guardarHistorias(historias);
+
+            res.json({
+                mensaje: estado === "publicado"
+                    ? "¡El capítulo se publicó correctamente!"
+                    : "El capítulo volvió a ser un borrador.",
+                capitulo
+            });
+        } catch (error) {
+            console.error("Error al cambiar el estado:", error);
+
+            res.status(500).json({
+                error: "No se pudo actualizar el estado del capítulo."
+            });
+        }
+    }
+);
+
+// EDITAR CAPÍTULO
+app.put("/api/historias/:id/capitulos/:capituloId", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indiceHistoria = buscarHistoriaPropia(
+        historias,
+        req.params.id,
+        req.session.usuarioId
+    );
+
+    if (indiceHistoria === -1) {
+        return res.status(404).json({
+            error: "No se encontró la historia."
+        });
+    }
+
+    const historia = historias[indiceHistoria];
+
+    const capitulo = (historia.capitulos || []).find(
+        c => c.id === req.params.capituloId
+    );
+
+    if (!capitulo) {
+        return res.status(404).json({
+            error: "No se encontró el capítulo."
+        });
+    }
+
+    const titulo = typeof req.body.titulo === "string"
+        ? req.body.titulo.trim()
+        : "";
+
+    const contenido = req.body.contenido;
+
+    if (!titulo) {
+        return res.status(400).json({
+            error: "El capítulo necesita un título."
+        });
+    }
+
+    if (!esDocumentoValido(contenido)) {
+        return res.status(400).json({
+            error: "El contenido del capítulo no tiene un formato válido."
+        });
+    }
+
+    capitulo.titulo = titulo;
+    capitulo.contenido = contenido;
+    capitulo.ultimaEdicion = new Date().toISOString();
+
+    guardarHistorias(historias);
+
+    res.json(capitulo);
+});
+
+
+// ELIMINAR CAPÍTULO
+// MOVER CAPÍTULO A LA PAPELERA
+app.delete("/api/historias/:id/capitulos/:capituloId", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indiceHistoria = buscarHistoriaActiva(
+        historias,
+        req.params.id,
+        req.session.usuarioId
+    );
+
+    if (indiceHistoria === -1) {
+        return res.status(404).json({
+            error: "No se encontró la historia."
+        });
+    }
+
+    const historia = historias[indiceHistoria];
+
+    const indiceCapitulo = (historia.capitulos || []).findIndex(
+        c => c.id === req.params.capituloId
+    );
+
+    if (indiceCapitulo === -1) {
+        return res.status(404).json({
+            error: "No se encontró el capítulo."
+        });
+    }
+
+    const [capitulo] = historia.capitulos.splice(indiceCapitulo, 1);
+
+    if (!Array.isArray(historia.capitulosPapelera)) {
+        historia.capitulosPapelera = [];
+    }
+
+    historia.capitulosPapelera.push({
+        ...capitulo,
+        fechaEliminacion: new Date().toISOString()
+    });
+
+    try {
+        guardarHistorias(historias);
+
+        res.json({
+            mensaje: "El capítulo se movió a la papelera."
+        });
+    } catch (error) {
+        console.error("Error al mover capítulo a papelera:", error);
+
+        res.status(500).json({
+            error: "No se pudo mover el capítulo a la papelera."
+        });
+    }
+});
+
+// OBTENER CAPÍTULOS DE LA PAPELERA
+app.get("/api/historias/:id/capitulos/papelera", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indiceHistoria = buscarHistoriaActiva(
+        historias,
+        req.params.id,
+        req.session.usuarioId
+    );
+
+    if (indiceHistoria === -1) {
+        return res.status(404).json({
+            error: "No se encontró la historia."
+        });
+    }
+
+    const historia = historias[indiceHistoria];
+    const ahora = Date.now();
+    const treintaDias = 30 * 24 * 60 * 60 * 1000;
+
+    const capitulosPapelera = historia.capitulosPapelera || [];
+
+    const capitulosVigentes = capitulosPapelera.filter(capitulo => {
+        if (!capitulo.fechaEliminacion) {
+            return true;
+        }
+
+        const fecha = new Date(capitulo.fechaEliminacion).getTime();
+
+        return !Number.isNaN(fecha) &&
+            ahora - fecha <= treintaDias;
+    });
+
+    if (capitulosVigentes.length !== capitulosPapelera.length) {
+        historia.capitulosPapelera = capitulosVigentes;
+        guardarHistorias(historias);
+    }
+
+    res.json(capitulosVigentes);
+});
+
+// RESTAURAR CAPÍTULO DE LA PAPELERA
+app.post("/api/historias/:id/capitulos/:capituloId/restaurar", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indiceHistoria = buscarHistoriaActiva(
+        historias,
+        req.params.id,
+        req.session.usuarioId
+    );
+
+    if (indiceHistoria === -1) {
+        return res.status(404).json({
+            error: "No se encontró la historia."
+        });
+    }
+
+    const historia = historias[indiceHistoria];
+
+    if (!Array.isArray(historia.capitulosPapelera)) {
+        historia.capitulosPapelera = [];
+    }
+
+    const indiceCapitulo = historia.capitulosPapelera.findIndex(
+        c => c.id === req.params.capituloId
+    );
+
+    if (indiceCapitulo === -1) {
+        return res.status(404).json({
+            error: "No se encontró el capítulo en la papelera."
+        });
+    }
+
+    const [capitulo] = historia.capitulosPapelera.splice(indiceCapitulo, 1);
+
+    const { fechaEliminacion, ...capituloRestaurado } = capitulo;
+
+    if (!Array.isArray(historia.capitulos)) {
+        historia.capitulos = [];
+    }
+
+    historia.capitulos.push(capituloRestaurado);
+
+    try {
+        guardarHistorias(historias);
+
+        res.json({
+            mensaje: "El capítulo se restauró correctamente.",
+            capitulo: capituloRestaurado
+        });
+    } catch (error) {
+        console.error("Error al restaurar capítulo:", error);
+
+        res.status(500).json({
+            error: "No se pudo restaurar el capítulo."
+        });
+    }
+});
+
+// ELIMINAR CAPÍTULO DEFINITIVAMENTE
+app.delete("/api/historias/:id/capitulos/papelera/:capituloId", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+
+    const indiceHistoria = buscarHistoriaActiva(
+        historias,
+        req.params.id,
+        req.session.usuarioId
+    );
+
+    if (indiceHistoria === -1) {
+        return res.status(404).json({
+            error: "No se encontró la historia."
+        });
+    }
+
+    const historia = historias[indiceHistoria];
+
+    if (!Array.isArray(historia.capitulosPapelera)) {
+        historia.capitulosPapelera = [];
+    }
+
+    const indiceCapitulo = historia.capitulosPapelera.findIndex(
+        c => c.id === req.params.capituloId
+    );
+
+    if (indiceCapitulo === -1) {
+        return res.status(404).json({
+            error: "No se encontró el capítulo en la papelera."
+        });
+    }
+
+    historia.capitulosPapelera.splice(indiceCapitulo, 1);
+
+    try {
+        guardarHistorias(historias);
+
+        res.json({
+            mensaje: "El capítulo se eliminó definitivamente."
+        });
+    } catch (error) {
+        console.error("Error al eliminar capítulo:", error);
+
+        res.status(500).json({
+            error: "No se pudo eliminar el capítulo."
+        });
+    }
+});          
+
+// OBTENER TODOS LOS CAPÍTULOS DE LA PAPELERA DEL USUARIO
+app.get("/api/papelera/capitulos", (req, res) => {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const historias = cargarHistorias();
+    const ahora = Date.now();
+    const treintaDias = 30 * 24 * 60 * 60 * 1000;
+
+    const misCapitulosPapelera = [];
+
+    historias.forEach(historia => {
+        if (
+            historia.creador !== req.session.usuarioId ||
+            historia.enPapelera === true
+        ) {
+            return;
+        }
+
+        const capitulos = historia.capitulosPapelera || [];
+
+        const capitulosVigentes = capitulos.filter(capitulo => {
+            if (!capitulo.fechaEliminacion) {
+                return true;
+            }
+
+            const fecha = new Date(capitulo.fechaEliminacion).getTime();
+
+            return !Number.isNaN(fecha) &&
+                ahora - fecha <= treintaDias;
+        });
+
+        if (capitulosVigentes.length !== capitulos.length) {
+            historia.capitulosPapelera = capitulosVigentes;
+        }
+
+        capitulosVigentes.forEach(capitulo => {
+            misCapitulosPapelera.push({
+                ...capitulo,
+                historiaId: historia.id,
+                historiaTitulo: historia.titulo
+            });
+        });
+    });
+
+    guardarHistorias(historias);
+
+    res.json(misCapitulosPapelera);
+});
+
+app.post("/api/usuarios/registro", (req, res) => {
+
+    const {
+        usuario,
+        correo,
+        contrasena,
+        perfil
+    } = req.body;
+
+    if (!usuario || !correo || !contrasena) {
+        return res.status(400).json({
+            error: "Completa todos los campos."
+        });
+    }
+
+    const nombre = usuario.trim();
+    const email = correo.trim().toLowerCase();
+
+    if (nombre.length < 3 || nombre.length > 30) {
+        return res.status(400).json({
+            error: "El nombre debe tener entre 3 y 30 caracteres."
+        });
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(nombre)) {
+        return res.status(400).json({
+            error: "Usa solo letras, números, guiones y guiones bajos."
+        });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({
+            error: "Escribe un correo electrónico válido."
+        });
+    }
+
+    if (
+        typeof contrasena !== "string" ||
+        contrasena.length < 8 ||
+        Buffer.byteLength(contrasena, "utf8") > 128
+    ) {
+        return res.status(400).json({
+            error: "La contraseña debe tener al menos 8 caracteres."
+        });
+    }
+
+    if (!perfil || typeof perfil !== "object") {
+        return res.status(400).json({
+            error: "Faltan los datos del perfil."
+        });
+    }
+
+    const {
+        diaCumpleanos,
+        mesCumpleanos,
+        preferencia,
+        generosLectura,
+        generosEscritura,
+        nombrePublico,
+        descripcion,
+        visibilidadDescripcion,
+        redesSociales,
+        fotoPerfil
+    } = perfil;
+
+    if (
+    fotoPerfil !== null &&
+    fotoPerfil !== undefined &&
+    (
+        typeof fotoPerfil !== "string" ||
+        fotoPerfil.length > 1500000 ||
+        !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(fotoPerfil)
+    )
+) {
+    return res.status(400).json({
+        error: "La fotografía de perfil no es válida."
+    });
+}
+
+    if (
+        !diaCumpleanos ||
+        !mesCumpleanos ||
+        !["leer", "escribir", "ambas"].includes(preferencia)
+    ) {
+        return res.status(400).json({
+            error: "Completa tu cumpleaños y tus preferencias."
+        });
+    }
+
+    const dia = Number(diaCumpleanos);
+    const mes = Number(mesCumpleanos);
+
+    if (
+        !Number.isInteger(dia) ||
+        !Number.isInteger(mes) ||
+        mes < 1 || mes > 12 ||
+        dia < 1 || dia > 31
+    ) {
+        return res.status(400).json({
+            error: "La fecha de cumpleaños no es válida."
+        });
+    }
+
+    if (
+        !Array.isArray(generosLectura) ||
+        !Array.isArray(generosEscritura) ||
+        generosLectura.length > 3 ||
+        generosEscritura.length > 3
+    ) {
+        return res.status(400).json({
+            error: "Revisa tus géneros seleccionados."
+        });
+    }
+
+    if (
+        typeof nombrePublico !== "string" ||
+        !nombrePublico.trim() ||
+        nombrePublico.trim().length > 30
+    ) {
+        return res.status(400).json({
+            error: "El nombre público no es válido."
+        });
+    }
+
+    if (
+        typeof descripcion !== "string" ||
+        descripcion.length > 500
+    ) {
+        return res.status(400).json({
+            error: "La descripción no puede superar los 500 caracteres."
+        });
+    }
+
+    if (
+        !["publica", "privada", "ninguna"].includes(visibilidadDescripcion)
+    ) {
+        return res.status(400).json({
+            error: "Selecciona la privacidad de tu descripción."
+        });
+    }
+
+    if (!Array.isArray(redesSociales)) {
+        return res.status(400).json({
+            error: "Los enlaces de redes sociales no son válidos."
+        });
+    }
+
+    const redesValidas = redesSociales.every(enlace => {
+        try {
+            const url = new URL(enlace);
+            return url.protocol === "https:" || url.protocol === "http:";
+        } catch {
+            return false;
+        }
+    });
+
+    if (!redesValidas) {
+        return res.status(400).json({
+            error: "Uno de los enlaces de tus redes no es válido."
+        });
+    }
+
+    try {
+        const usuarios = cargarUsuarios();
+
+console.log("USUARIOS ENCONTRADOS:", usuarios.length);
+console.log("NOMBRE NUEVO:", nombre);
+console.log("CORREO NUEVO:", email);
+
+const usuarioEncontrado = buscarUsuarioExistente(
+    usuarios,
+    nombre,
+    email
+);
+
+console.log("¿ENCONTRÓ DUPLICADO?:", usuarioEncontrado);
+
+if (usuarioEncontrado) {
+    
+            return res.status(409).json({
+                error: "Ese nombre de usuario o correo ya está registrado."
+            });
+        }
+
+        const sal = crypto.randomBytes(16).toString("hex");
+
+        const hashContrasena = crypto
+            .scryptSync(contrasena, sal, 64)
+            .toString("hex");
+
+        const nuevoUsuario = {
+            id: crypto.randomUUID(),
+
+            usuario: nombre,
+            correo: email,
+
+            sal,
+            hashContrasena,
+
+            fechaRegistro: new Date().toISOString(),
+
+            fotoPerfil: fotoPerfil || null,
+
+            perfil: {
+                nombrePublico: nombrePublico.trim(),
+
+                cumpleanos: {
+                    dia,
+                    mes
+                },
+
+                preferencia,
+
+                generosLectura,
+                generosEscritura,
+
+                descripcion: descripcion.trim(),
+                visibilidadDescripcion,
+
+                redesSociales
+            }
+        };
+
+        usuarios.push(nuevoUsuario);
+        guardarUsuarios(usuarios);
+
+        req.session.usuarioId = nuevoUsuario.id;
+
+        req.session.save(error => {
+
+            if (error) {
+                console.error("Error al guardar la sesión:", error);
+
+                return res.status(500).json({
+                    error: "La cuenta se creó, pero no se pudo iniciar la sesión."
+                });
+            }
+
+            return res.status(201).json({
+                mensaje: "¡Tu cuenta LoreAI está lista!",
+
+                usuario: {
+                    id: nuevoUsuario.id,
+                    usuario: nuevoUsuario.usuario,
+                    correo: nuevoUsuario.correo,
+                    perfil: nuevoUsuario.perfil
+                }
+            });
+
+        });
+
+    } catch (error) {
+        console.error("Error al registrar usuario:", error);
+
+        return res.status(500).json({
+            error: "No se pudo guardar la cuenta. Revisa el servidor."
+        });
+    }
+
+});
+
+function buscarUsuarioPorIdentificador(usuarios, identificador) {
+    const dato = identificador.trim().toLowerCase();
+
+    return usuarios.find(cuenta =>
+        cuenta.usuario.toLowerCase() === dato ||
+        cuenta.correo.toLowerCase() === dato
+    );
+}
+
+// INICIAR SESIÓN
+app.post("/api/usuarios/login", (req, res) => {
+    const { usuario, contrasena } = req.body;
+
+    if (
+        typeof usuario !== "string" ||
+        typeof contrasena !== "string" ||
+        !usuario.trim() ||
+        !contrasena
+    ) {
+        return res.status(400).json({
+            error: "Escribe tu usuario o correo y tu contraseña."
+        });
+    }
+
+    try {
+        const usuarios = cargarUsuarios();
+        const cuenta = buscarUsuarioPorIdentificador(
+            usuarios,
+            usuario
+        );
+
+        if (!cuenta) {
+            return res.status(401).json({
+                error: "Usuario o contraseña incorrectos."
+            });
+        }
+
+        const hashIngresado = crypto.scryptSync(
+            contrasena,
+            cuenta.sal,
+            64
+        );
+
+        const hashGuardado = Buffer.from(
+            cuenta.hashContrasena,
+            "hex"
+        );
+
+        if (
+            hashGuardado.length !== 64 ||
+            !crypto.timingSafeEqual(hashIngresado, hashGuardado)
+        ) {
+            return res.status(401).json({
+                error: "Usuario o contraseña incorrectos."
+            });
+        }
+
+        req.session.usuarioId = cuenta.id;
+
+        req.session.save(error => {
+            if (error) {
+                console.error("Error al guardar la sesión:", error);
+                return res.status(500).json({
+                    error: "No se pudo iniciar la sesión."
+                });
+            }
+
+            res.json({
+                mensaje: "Sesión iniciada correctamente.",
+                usuario: {
+                    id: cuenta.id,
+                    usuario: cuenta.usuario,
+                    correo: cuenta.correo
+                }
+            });
+        });
+    } catch (error) {
+        console.error("Error al iniciar sesión:", error);
+
+        res.status(500).json({
+            error: "Ocurrió un error al iniciar sesión."
+        });
+    }
+});
+
+// COMPROBAR SESIÓN ACTUAL
+app.get("/api/usuarios/sesion", (req, res) => {
+    console.log("ID de sesión:", req.sessionID);
+console.log("Usuario en sesión:", req.session.usuarioId);
+    res.set("Cache-Control", "no-store");
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            autenticado: false
+        });
+    }
+
+    const usuarios = cargarUsuarios();
+
+    const cuenta = usuarios.find(
+        usuario => usuario.id === req.session.usuarioId
+    );
+
+    if (!cuenta) {
+        return req.session.destroy(() => {
+            res.status(401).json({ autenticado: false });
+        });
+    }
+
+    const perfil = cuenta.perfil || {};
+
+    res.json({
+        autenticado: true,
+        usuario: {
+            id: cuenta.id,
+            usuario: cuenta.usuario,
+            correo: cuenta.correo,
+
+            nombrePublico: perfil.nombrePublico || "",
+            cumpleanos: perfil.cumpleanos || {
+                dia: null,
+                mes: null
+            },
+            preferencia: perfil.preferencia || "",
+            generosLectura: perfil.generosLectura || [],
+            generosEscritura: perfil.generosEscritura || [],
+            descripcion: perfil.descripcion || "",
+            visibilidadDescripcion: perfil.visibilidadDescripcion || "privada",
+            redesSociales: perfil.redesSociales || [],
+            fotoPerfil: perfil.fotoPerfil || null,
+portadaPerfil: perfil.portadaPerfil || null
+        }
+    });
+});
+
+
+app.get("/api/usuarios/:id/publico", (req, res) => {
+    const usuarios = cargarUsuarios();
+    const historias = cargarHistorias();
+
+    // Buscar al usuario solicitado
+    const autor = usuarios.find(
+        usuario => usuario.id === req.params.id
+    );
+
+    if (!autor) {
+        return res.status(404).json({
+            error: "No encontramos este perfil."
+        });
+    }
+
+    // Impedir que alguien consulte su propio perfil público
+    if (req.session.usuarioId === autor.id) {
+        return res.status(403).json({
+            error: "Este es tu perfil. Accede desde tu cuenta."
+        });
+    }
+
+    const perfil = autor.perfil || {};
+
+    
+
+    // Solo mostrar historias publicadas por este usuario
+    const obras = historias.filter(
+        historia =>
+            historia.creador === autor.id &&
+            historia.estado === "publicada"
+    );
+
+    // Preparar exclusivamente la información pública
+    res.json({
+        id: autor.id,
+        nombrePublico: perfil.nombrePublico || "Autor de LoreAI",
+        fotoPerfil: perfil.fotoPerfil || null,
+        portadaPerfil: perfil.portadaPerfil || null,
+
+        descripcion:
+            perfil.visibilidadDescripcion === "publica"
+                ? perfil.descripcion || ""
+                : "",
+
+        redesSociales: perfil.redesSociales || [],
+
+        obras: obras,
+
+        seguidores: 0,
+        siguiendo: 0,
+        colaboraciones: 0,
+
+        bibliotecaPublica: []
+    });
+});
+
+
+// ==============================
+//       MEMORIA DE LORE-CHAN
+// ==============================
+
+
+// RECUPERAR CONVERSACIÓN DE UNA HISTORIA
+app.get("/api/lorechat", (req, res) => {
+  if (!req.session.usuarioId) {
+    return res.status(401).json({ error: "Debes iniciar sesión." });
+  }
+
+  const { historiaId } = req.query;
+
+  if (!historiaId) {
+    return res.status(400).json({ error: "Falta el ID de la historia." });
+  }
+
+  const conversaciones = cargarConversaciones();
+
+  const conversacion = conversaciones.find(item =>
+    item.usuarioId === req.session.usuarioId &&
+    String(item.historiaId) === String(historiaId)
+  );
+
+  res.json(conversacion ? conversacion.mensajes : []);
+});
+
+
+// GUARDAR CONVERSACIÓN DE UNA HISTORIA
+app.put("/api/lorechat", (req, res) => {
+  if (!req.session.usuarioId) {
+    return res.status(401).json({ error: "Debes iniciar sesión." });
+  }
+
+  const { historiaId, mensajes } = req.body;
+
+  if (!historiaId) {
+    return res.status(400).json({ error: "Falta el ID de la historia." });
+  }
+
+  if (!Array.isArray(mensajes)) {
+    return res.status(400).json({ error: "El historial no es válido." });
+  }
+
+  if (mensajes.length > 200) {
+    return res.status(400).json({ error: "El historial es demasiado largo." });
+  }
+
+  const conversaciones = cargarConversaciones();
+
+  const indice = conversaciones.findIndex(item =>
+    item.usuarioId === req.session.usuarioId &&
+    String(item.historiaId) === String(historiaId)
+  );
+
+  const conversacionActualizada = {
+    usuarioId: req.session.usuarioId,
+    historiaId,
+    mensajes,
+    fechaActualizacion: new Date().toISOString()
+  };
+
+  if (indice === -1) {
+    conversaciones.push(conversacionActualizada);
+  } else {
+    conversaciones[indice] = conversacionActualizada;
+  }
+
+  guardarConversaciones(conversaciones);
+
+  res.json({ mensaje: "Conversación guardada correctamente." });
+});
+
+
+
+// ==============================
+// ACTUALIZAR PERFIL
+// ==============================
+
+app.put("/api/usuarios/perfil", (req, res) => {
+
+    // Comprobar que haya una sesión iniciada
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión para editar tu perfil."
+        });
+    }
+
+    const {
+    nombrePublico,
+    cumpleanos,
+    preferencia,
+    generosLectura,
+    generosEscritura,
+    descripcion,
+    visibilidadDescripcion,
+    redesSociales,
+    fotoPerfil,
+    portadaPerfil
+} = req.body;
+
+// Validar imágenes del perfil
+function imagenValida(imagen) {
+    if (imagen === undefined || imagen === null) {
+        return true;
+    }
+
+    if (typeof imagen !== "string") {
+        return false;
+    }
+
+    if (imagen === "") {
+        return true;
+    }
+
+    return (
+        imagen.length <= 1500000 &&
+        /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(imagen)
+    );
+}
+
+if (!imagenValida(fotoPerfil) || !imagenValida(portadaPerfil)) {
+    return res.status(400).json({
+        error: "Una de las imágenes no es válida o supera el tamaño permitido."
+    });
+}
+
+    // Validar nombre público
+    if (
+        typeof nombrePublico !== "string" ||
+        !nombrePublico.trim() ||
+        nombrePublico.trim().length > 30
+    ) {
+        return res.status(400).json({
+            error: "El nombre público debe tener entre 1 y 30 caracteres."
+        });
+    }
+
+    // Validar cumpleaños
+    if (
+        !cumpleanos ||
+        !Number.isInteger(Number(cumpleanos.dia)) ||
+        !Number.isInteger(Number(cumpleanos.mes)) ||
+        Number(cumpleanos.mes) < 1 ||
+        Number(cumpleanos.mes) > 12 ||
+        Number(cumpleanos.dia) < 1 ||
+        Number(cumpleanos.dia) > 31
+    ) {
+        return res.status(400).json({
+            error: "La fecha de cumpleaños no es válida."
+        });
+    }
+
+    // Validar preferencias
+    if (!["leer", "escribir", "ambas"].includes(preferencia)) {
+        return res.status(400).json({
+            error: "La preferencia seleccionada no es válida."
+        });
+    }
+
+    // Validar géneros
+    if (
+        !Array.isArray(generosLectura) ||
+        !Array.isArray(generosEscritura) ||
+        generosLectura.length > 3 ||
+        generosEscritura.length > 3
+    ) {
+        return res.status(400).json({
+            error: "Revisa los géneros seleccionados."
+        });
+    }
+
+    // Validar descripción
+    if (
+        typeof descripcion !== "string" ||
+        descripcion.length > 500
+    ) {
+        return res.status(400).json({
+            error: "La descripción no puede superar los 500 caracteres."
+        });
+    }
+
+    // Validar privacidad
+    if (
+        !["publica", "privada", "ninguna"].includes(visibilidadDescripcion)
+    ) {
+        return res.status(400).json({
+            error: "La opción de privacidad no es válida."
+        });
+    }
+
+    // Validar redes sociales
+    if (
+        !Array.isArray(redesSociales) ||
+        !redesSociales.every(enlace => {
+            if (typeof enlace !== "string") return false;
+
+            try {
+                const url = new URL(enlace);
+                return url.protocol === "https:" || url.protocol === "http:";
+            } catch {
+                return false;
+            }
+        })
+    ) {
+        return res.status(400).json({
+            error: "Uno de los enlaces no es válido."
+        });
+    }
+
+    try {
+        const usuarios = cargarUsuarios();
+
+        // Buscar únicamente al usuario de la sesión
+        const indice = usuarios.findIndex(
+            cuenta => cuenta.id === req.session.usuarioId
+        );
+
+        if (indice === -1) {
+            return res.status(404).json({
+                error: "No se encontró tu cuenta."
+            });
+        }
+
+        // Actualizar solamente los datos del perfil
+        usuarios[indice].perfil = {
+    ...usuarios[indice].perfil,
+
+    nombrePublico: nombrePublico.trim(),
+
+    fotoPerfil: fotoPerfil !== undefined
+        ? fotoPerfil
+        : usuarios[indice].perfil.fotoPerfil || null,
+
+    portadaPerfil: portadaPerfil !== undefined
+        ? portadaPerfil
+        : usuarios[indice].perfil.portadaPerfil || null,
+
+    cumpleanos: {
+        dia: Number(cumpleanos.dia),
+        mes: Number(cumpleanos.mes)
+    },
+    preferencia,
+    generosLectura,
+    generosEscritura,
+    descripcion: descripcion.trim(),
+    visibilidadDescripcion,
+    redesSociales
+};
+
+        guardarUsuarios(usuarios);
+
+        res.json({
+            mensaje: "¡Tu perfil se actualizó correctamente!",
+            usuario: {
+                id: usuarios[indice].id,
+                usuario: usuarios[indice].usuario,
+                correo: usuarios[indice].correo,
+                ...usuarios[indice].perfil
+            }
+        });
+
+    } catch (error) {
+        console.error("Error al actualizar perfil:", error);
+
+        res.status(500).json({
+            error: "No se pudieron guardar los cambios."
+        });
+    }
+});
+
+// CERRAR SESIÓN
+app.post("/api/usuarios/logout", (req, res) => {
+    req.session.destroy(error => {
+        if (error) {
+            return res.status(500).json({
+                error: "No se pudo cerrar la sesión."
+            });
+        }
+
+        res.clearCookie("loreai.sid");
+        res.json({
+            mensaje: "Sesión cerrada correctamente."
+        });
+    });
+});
+
+
+ // RESPONDER CON INTELIGENCIA ARTIFICIAL
+app.post("/api/lorechat/responder", async (req, res) => {
+  if (!req.session.usuarioId) {
+    return res.status(401).json({
+      error: "Debes iniciar sesión."
+    });
+  }
+
+  const { historiaId, mensajes } = req.body;
+
+  if (!historiaId || !Array.isArray(mensajes)) {
+    return res.status(400).json({
+      error: "La información de la conversación no es válida."
+    });
+  }
+
+  try {
+    const historial = mensajes
+      .slice(-8)
+      .filter(item =>
+        item &&
+        typeof item.texto === "string" &&
+        item.texto.trim()
+      )
+      .map(item => ({
+        role: item.tipo === "usuario" ? "user" : "assistant",
+        content: item.texto.slice(0, 1500)
+      }));
+
+    const respuestaIA = await fetch(
+      "http://127.0.0.1:11434/api/chat",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "qwen2.5:0.5b",
+          messages: [
+            {
+              role: "system",
+              content: `Eres Lore-Chan, la asistente creativa de LoreAI.
+Tu propósito es acompañar a escritores y lectores.
+Ayudas a desarrollar personajes, tramas, escenarios e ideas.
+Haz preguntas cuando necesites conocer mejor una historia.
+No impongas tus ideas ni reemplaces la creatividad del autor.
+Habla siempre en español, con amabilidad y entusiasmo.
+Sé clara, natural y breve. Evita repetir información.
+Responde normalmente en un máximo de 120 palabras.`
+            },
+            ...historial
+          ],
+          stream: false,
+          options: {
+            temperature: 0.7,
+            num_predict: 150
+          }
+        })
+      }
+    );
+
+    if (!respuestaIA.ok) {
+      throw new Error("Ollama no pudo generar la respuesta.");
+    }
+
+    const datos = await respuestaIA.json();
+
+    res.json({
+      respuesta: datos.message.content
+    });
+
+  } catch (error) {
+    console.error("Error en Lore-Chan IA:", error);
+
+    res.status(500).json({
+      error: "No pude generar una respuesta. Inténtalo nuevamente."
+    });
+  }
+});
+
+
+app.listen(PORT, () => {
+
+    console.log(`Servidor funcionando en http://localhost:${PORT}`);
+})

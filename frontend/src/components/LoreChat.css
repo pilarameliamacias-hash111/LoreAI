@@ -1,0 +1,208 @@
+
+.lore-launcher {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+  z-index: 9998;
+  width: 62px;
+  height: 62px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a8f4ed, #20b2aa);
+  color: white;
+  font-size: 34px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px #20b2aa66;
+  animation: lore-pulse 2s infinite;
+}
+
+.lore-star {
+  display: block;
+  text-shadow: 0 0 9px white;
+}
+
+@keyframes lore-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.lore-chat {
+  position: fixed;
+  right: 25px;
+  bottom: 100px;
+  z-index: 9999;
+  width: 340px;
+  height: 490px;
+  max-width: calc(100vw - 30px);
+  max-height: calc(100vh - 120px);
+  background: white;
+  border: 1px solid #ccece8;
+  border-radius: 16px;
+  box-shadow: 0 8px 35px #0002;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+  color: #222;
+}
+
+.lore-chat.lore-minimized {
+  height: 54px;
+}
+
+.lore-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  min-height: 72px;
+  box-sizing: border-box;
+  background: #e5f8f5;
+  border-bottom: 1px solid #ccece8;
+}
+
+.lore-avatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  flex: 0 0 52px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+  position: relative;
+}
+
+.lore-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.lore-heading {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lore-heading small {
+  color: #55716e;
+  font-size: 10px;
+}
+
+.lore-header button {
+  border: none;
+  background: transparent;
+  color: #365b58;
+  font-size: 21px;
+  cursor: pointer;
+  padding: 3px;
+}
+
+.lore-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lore-disclaimer {
+  margin: 0;
+  color: #7c8988;
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.lore-bubble {
+  max-width: 88%;
+  padding: 10px 12px;
+  border-radius: 13px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.lore-bot {
+  align-self: flex-start;
+  background: #edf8f6;
+}
+
+.lore-user {
+  align-self: flex-end;
+  background: #20b2aa;
+  color: white;
+}
+
+.lore-form {
+  display: flex;
+  gap: 7px;
+  padding: 10px;
+  border-top: 1px solid #e5eeee;
+}
+
+.lore-form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #cbdedc;
+  border-radius: 20px;
+  padding: 10px 12px;
+  outline-color: #20b2aa;
+}
+
+.lore-form button {
+  width: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #20b2aa;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.lore-chat.lore-expanded {
+  width: min(700px, calc(100vw - 40px));
+  height: min(850px, calc(100vh - 60px));
+  right: 20px;
+  bottom: 20px;
+}
+
+@media (max-width: 480px) {
+  .lore-chat {
+    right: 10px;
+    bottom: 85px;
+    width: calc(100vw - 20px);
+    height: min(520px, calc(100vh - 105px));
+  }
+
+  .lore-launcher {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lore-launcher {
+    animation: none;
+  }
+}
+
+.lore-header {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.lore-header:active {
+  cursor: grabbing;
+}

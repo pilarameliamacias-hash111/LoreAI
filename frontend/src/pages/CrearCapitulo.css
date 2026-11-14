@@ -1,0 +1,117 @@
+.area-escritura-capitulo {
+  white-space: pre-wrap;
+}
+.notificacion-editor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 12px 18px;
+  margin: 12px 0;
+  background: #e5f8f2;
+  border: 1px solid #a8dfcc;
+  border-radius: 9px;
+  color: #267b61;
+  font-size: 14px;
+  animation: aparecerNotificacion 0.25s ease;
+}
+
+.notificacion-editor button {
+  border: none;
+  background: transparent;
+  color: #267b61;
+  font-size: 23px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+@keyframes aparecerNotificacion {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* PAPELERA DE CAPÍTULOS */
+
+.boton-papelera-capitulos {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border: 1px solid #20b2aa;
+  border-radius: 8px;
+  background: #e9fafa;
+  color: #167f7a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.boton-papelera-capitulos:hover {
+  background: #d3f3f1;
+}
+
+.lista-papelera-capitulos {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f4fafa;
+  border: 1px solid #c8e7e5;
+}
+
+.lista-papelera-capitulos h3 {
+  margin: 0 0 12px;
+  color: #167f7a;
+  font-size: 0.9rem;
+}
+
+.elemento-papelera-capitulo {
+  padding: 12px 0;
+  border-bottom: 1px solid #d8e8e7;
+}
+
+.elemento-papelera-capitulo:last-child {
+  border-bottom: none;
+}
+
+.elemento-papelera-capitulo strong {
+  display: block;
+  margin-bottom: 10px;
+  overflow-wrap: anywhere;
+}
+
+.acciones-papelera-capitulo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.acciones-papelera-capitulo button {
+  padding: 7px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #20b2aa;
+  color: white;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.acciones-papelera-capitulo button:hover {
+  background: #168f89;
+}
+
+.acciones-papelera-capitulo button:last-child {
+  background: #b94b58;
+}
+
+.acciones-papelera-capitulo button:last-child:hover {
+  background: #963744;
+}

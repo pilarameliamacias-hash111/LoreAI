@@ -1,0 +1,119 @@
+
+.fondo-modal-monetizacion {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-monetizacion {
+  position: relative;
+  background: white;
+  color: #222;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.cerrar-monetizacion {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.icono-monetizacion {
+  display: block;
+  font-size: 35px;
+  text-align: center;
+  color: #20a99c;
+}
+
+.modal-monetizacion h2 {
+  text-align: center;
+  margin: 10px 0 20px;
+}
+
+.modal-monetizacion p {
+  line-height: 1.5;
+}
+
+.resumen-monetizacion {
+  background: #eef9f7;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 18px 0;
+}
+
+.resumen-monetizacion p {
+  margin: 8px 0;
+}
+
+.condiciones-monetizacion {
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.condiciones-monetizacion ul {
+  padding-left: 20px;
+  line-height: 1.7;
+}
+
+.aceptacion-monetizacion {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+.aceptacion-monetizacion input {
+  margin-top: 4px;
+}
+
+.boton-aceptar-monetizacion,
+.boton-cancelar-monetizacion {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.boton-aceptar-monetizacion {
+  border: none;
+  background: #20a99c;
+  color: white;
+}
+
+.boton-aceptar-monetizacion:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.boton-cancelar-monetizacion {
+  background: transparent;
+  border: 1px solid #ccc;
+}
+
+.aviso-monetizacion {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  color: #777;
+  line-height: 1.4;
+}

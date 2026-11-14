@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escribir | LoreAI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body id="pagina-escritura">
+
+<header class="barra-escritura">
+
+    <div class="datos-escritura">
+        <a id="volver-historia" href="#">← Volver a la historia</a>
+
+        <h1 id="nombre-obra">Cargando obra...</h1>
+
+        <input
+            type="text"
+            id="titulo-capitulo"
+            placeholder="Título del capítulo"
+            maxlength="150"
+        >
+
+        <div class="estado-escritura">
+            <span id="estado-capitulo">Borrador</span>
+            <span>·</span>
+            <span id="contador-palabras">0 palabras</span>
+        </div>
+    </div>
+
+    <div class="acciones-escritura">
+        <button id="guardar-capitulo" type="button">Guardar</button>
+        <button id="vista-previa" type="button">Vista previa</button>
+        <button id="publicar-capitulo" type="button">Publicar</button>
+
+        <div class="menu-escritura">
+            <button id="boton-menu" type="button" aria-label="Más opciones">⋮</button>
+
+            <div id="opciones-menu" hidden>
+                <button id="eliminar-capitulo" type="button">
+                    Eliminar capítulo
+                </button>
+                <button id="programar-capitulo" type="button">
+                    Elegir horario de publicación
+                </button>
+            </div>
+        </div>
+    </div>
+
+</header>
+
+<main class="zona-escritura">
+
+    <a href="#" id="boton-portada" class="boton-portada">
+        Portada
+    </a>
+
+    <section class="contenedor-editor">
+
+        <div class="herramientas-multimedia">
+            <button type="button" title="Agregar imagen" disabled>
+                <icon>▧</icon>
+            </button>
+
+            <button type="button" title="Agregar vídeo" disabled>
+                ▶
+            </button>
+
+            <button type="button" title="Agregar audio" disabled>
+                ♫
+            </button>
+
+            <span>Multimedia próximamente</span>
+        </div>
+
+        <div id="editor-texto" class="hoja-escritura"></div>
+
+    </section>
+
+</main>
+
+<script type="module" src="escribir-capitulo.js"></script>
+
+</body>
+</html>

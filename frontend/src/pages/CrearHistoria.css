@@ -1,0 +1,847 @@
+
+/* =================================
+   PÁGINA CREAR HISTORIA - LOREAI
+================================= */
+
+.pagina-crear-historia {
+  min-height: 100vh;
+  padding: 30px 6%;
+  background: #f4fbfb;
+  font-family: Arial, sans-serif;
+  color: #263b3b;
+}
+
+/* ENCABEZADO */
+
+.encabezado-crear-historia {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 24px;
+  background: white;
+  border: 1px solid #dceeee;
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(36, 130, 130, 0.08);
+}
+
+.miniatura-encabezado {
+  width: 65px;
+  height: 80px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #dff3f1;
+  color: #36aaaa;
+  font-size: 28px;
+}
+
+.miniatura-encabezado img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.titulo-encabezado-crear {
+  flex: 1;
+}
+
+.titulo-encabezado-crear h1 {
+  margin: 0 0 6px;
+  color: #268f90;
+  font-size: 25px;
+}
+
+.titulo-encabezado-crear p {
+  margin: 0;
+  color: #829797;
+  font-size: 14px;
+}
+
+.encabezado-crear-historia > button {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 9px;
+  background: #e5f5f4;
+  color: #218f90;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.encabezado-crear-historia > button:hover {
+  background: #ccebea;
+}
+
+/* DISTRIBUCIÓN PRINCIPAL */
+
+.formulario-crear-historia {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 2fr);
+  gap: 28px;
+  align-items: start;
+  margin-top: 30px;
+}
+
+/* PORTADA */
+
+.selector-portada {
+  position: sticky;
+  top: 25px;
+}
+
+.cuadro-portada {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border: 2px dashed #8acaca;
+  border-radius: 15px;
+  background: #e8f7f6;
+  color: #278f90;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.cuadro-portada:hover {
+  background: #d9f1ef;
+  border-color: #36aaaa;
+}
+
+.cuadro-portada img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.icono-portada {
+  font-size: 48px;
+  font-weight: 300;
+}
+
+.cuadro-portada small {
+  color: #7a9c9c;
+}
+
+.quitar-portada {
+  display: block;
+  margin: 12px auto;
+  border: none;
+  background: transparent;
+  color: #b65e5e;
+  cursor: pointer;
+}
+
+/* CAJA DE DETALLES */
+
+.caja-detalles-historia {
+  padding: 28px;
+  border: 1px solid #dceeee;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 3px 15px rgba(36, 130, 130, 0.07);
+}
+
+.titulo-detalles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e8f4f3;
+}
+
+.titulo-detalles h2 {
+  margin: 0;
+  color: #268f90;
+  font-size: 19px;
+  letter-spacing: 1px;
+}
+
+/* INTERRUPTOR COLABORACIÓN */
+
+.interruptor-colaboracion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #527171;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.interruptor-colaboracion input {
+  display: none;
+}
+
+.pista-interruptor {
+  position: relative;
+  width: 43px;
+  height: 23px;
+  border-radius: 20px;
+  background: #cbd8d8;
+  transition: 0.25s;
+}
+
+.pista-interruptor::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: white;
+  transition: 0.25s;
+}
+
+.interruptor-colaboracion input:checked + .pista-interruptor {
+  background: #36aaaa;
+}
+
+.interruptor-colaboracion input:checked + .pista-interruptor::before {
+  transform: translateX(20px);
+}
+
+/* CAMPOS */
+
+.campo-historia {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 22px;
+  color: #426666;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.campo-historia input,
+.campo-historia textarea,
+.campo-historia select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #d5e7e6;
+  border-radius: 9px;
+  outline: none;
+  background: #fbfefe;
+  color: #344b4b;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.campo-historia input:focus,
+.campo-historia textarea:focus,
+.campo-historia select:focus {
+  border-color: #36aaaa;
+  box-shadow: 0 0 0 3px rgba(54, 170, 170, 0.12);
+}
+
+.campo-historia textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.campo-historia small {
+  align-self: flex-end;
+  color: #8aa3a3;
+  font-weight: normal;
+}
+
+/* ETIQUETAS */
+
+.entrada-etiquetas {
+  display: flex;
+  gap: 9px;
+}
+
+.entrada-etiquetas input {
+  flex: 1;
+  min-width: 0;
+}
+
+.entrada-etiquetas button {
+  padding: 0 16px;
+  border: none;
+  border-radius: 9px;
+  background: #dff3f1;
+  color: #218f90;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.entrada-etiquetas button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lista-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.etiqueta-historia {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border-radius: 20px;
+  background: #e3f5f3;
+  color: #278c8c;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.etiqueta-historia button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #278c8c;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+/* BOTÓN GUARDAR */
+
+.boton-guardar-historia {
+  display: block;
+  width: 100%;
+  margin-top: 30px;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  background: #36aaaa;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.boton-guardar-historia:hover {
+  background: #258f90;
+  transform: translateY(-2px);
+}
+
+/* MODAL DE ÉXITO */
+
+.fondo-modal-exito {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(24, 55, 55, 0.45);
+}
+
+.modal-exito-historia {
+  position: relative;
+  width: min(100%, 420px);
+  padding: 40px 30px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.cerrar-modal-exito {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  color: #7b9292;
+  font-size: 27px;
+  cursor: pointer;
+}
+
+.icono-exito {
+  display: block;
+  margin-bottom: 15px;
+  color: #36aaaa;
+  font-size: 48px;
+}
+
+.modal-exito-historia h2 {
+  margin: 0 0 12px;
+  color: #268f90;
+  font-size: 21px;
+}
+
+.modal-exito-historia p {
+  margin: 0;
+  color: #789292;
+  font-size: 14px;
+}
+
+/* DISEÑO RESPONSIVE */
+
+@media (max-width: 750px) {
+  .pagina-crear-historia {
+    padding: 18px 4%;
+  }
+
+  .formulario-crear-historia {
+    grid-template-columns: 1fr;
+  }
+
+  .selector-portada {
+    position: static;
+    width: min(230px, 75%);
+    margin: 0 auto;
+  }
+
+  .encabezado-crear-historia {
+    flex-wrap: wrap;
+    padding: 14px;
+  }
+
+  .titulo-encabezado-crear h1 {
+    font-size: 19px;
+  }
+
+  .encabezado-crear-historia > button {
+    margin-left: auto;
+  }
+
+  .caja-detalles-historia {
+    padding: 19px;
+  }
+}
+
+@media (max-width: 420px) {
+  .titulo-detalles {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .entrada-etiquetas {
+    flex-direction: column;
+  }
+
+  .entrada-etiquetas button {
+    padding: 11px;
+  }
+}
+
+.mensaje-campo-obligatorio {
+  display: inline-block;
+  width: fit-content;
+  margin-top: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: #ffe8e8;
+  color: #c74444;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+.crear-capitulo {
+  min-height: 100vh;
+  background: #f5fbfb;
+  color: #304b4b;
+  font-family: Arial, sans-serif;
+}
+
+/* CABECERA */
+
+.cabecera-capitulo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 24px;
+  background: #36aaaa;
+  color: white;
+  flex-wrap: wrap;
+}
+
+.cabecera-capitulo button {
+  border: none;
+  border-radius: 9px;
+  padding: 11px 15px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.volver-capitulo {
+  background: transparent;
+  color: white;
+}
+
+.miniatura-historia-capitulo {
+  width: 48px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.identidad-historia-capitulo {
+  flex: 1;
+  min-width: 150px;
+}
+
+.identidad-historia-capitulo small {
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.identidad-historia-capitulo h1 {
+  margin: 4px 0;
+  font-size: 20px;
+}
+
+.acciones-capitulo {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.acciones-capitulo button {
+  background: white;
+  color: #218f90;
+}
+
+.acciones-capitulo .guardar-capitulo {
+  background: #176e70;
+  color: white;
+}
+
+.acciones-capitulo .eliminar-capitulo {
+  background: #fff0f0;
+  color: #b64d4d;
+}
+
+.acciones-capitulo button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ESTRUCTURA PRINCIPAL */
+
+.estructura-capitulo {
+  display: grid;
+  grid-template-columns: 230px minmax(300px, 1fr) 220px;
+  gap: 18px;
+  padding: 22px;
+  align-items: start;
+}
+
+/* ÍNDICE */
+
+.indice-capitulos,
+.panel-lateral-capitulo {
+  background: white;
+  border: 1px solid #d9eded;
+  border-radius: 13px;
+  padding: 13px;
+}
+
+.titulo-indice-capitulo {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  color: #238e90;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 8px 3px;
+}
+
+.lista-capitulos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.lista-capitulos button {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: #f3fafa;
+  color: #496565;
+  cursor: pointer;
+}
+
+.lista-capitulos button.capitulo-seleccionado {
+  background: #d8f3f1;
+  color: #147e80;
+  border-left: 4px solid #36aaaa;
+}
+
+.lista-capitulos button span {
+  overflow-wrap: anywhere;
+}
+
+/* ÁREA DE ESCRITURA */
+
+.zona-escritura-capitulo {
+  min-width: 0;
+  background: white;
+  border: 1px solid #d9eded;
+  border-radius: 15px;
+  padding: 22px;
+  min-height: 75vh;
+}
+
+.titulo-capitulo-editor input {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 1px solid #dceaea;
+  padding: 12px 5px;
+  margin-bottom: 16px;
+  font-size: 23px;
+  font-weight: bold;
+  color: #315b5b;
+  outline: none;
+}
+
+.titulo-capitulo-editor input:focus {
+  border-bottom-color: #36aaaa;
+}
+
+.barra-formato-capitulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  padding: 9px;
+  background: #f0f8f8;
+  border-radius: 9px;
+  margin-bottom: 18px;
+}
+
+.barra-formato-capitulo button {
+  min-width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #426666;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.barra-formato-capitulo button:hover,
+.barra-formato-capitulo button.formato-activo {
+  background: #d2eeee;
+  color: #168789;
+}
+
+.separador-formato {
+  height: 23px;
+  width: 1px;
+  background: #c7dddd;
+  margin: 0 4px;
+}
+
+/* EDITOR TIPTAP */
+
+.area-escritura-capitulo {
+  min-height: 480px;
+  padding: 15px 8px;
+  outline: none;
+  line-height: 1.8;
+  font-size: 16px;
+  color: #344f4f;
+  overflow-wrap: anywhere;
+}
+
+.area-escritura-capitulo p {
+  margin: 0 0 14px;
+}
+
+.area-escritura-capitulo h1,
+.area-escritura-capitulo h2,
+.area-escritura-capitulo h3 {
+  color: #247f80;
+  margin: 22px 0 12px;
+}
+
+.area-escritura-capitulo ul,
+.area-escritura-capitulo ol {
+  padding-left: 28px;
+}
+
+.mensaje-capitulo {
+  color: #238e70;
+  font-weight: bold;
+  padding: 10px 0;
+}
+
+/* PANEL LATERAL */
+
+.panel-lateral-capitulo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panel-lateral-capitulo > button {
+  padding: 12px 9px;
+  border: none;
+  border-radius: 8px;
+  background: #f0f8f8;
+  color: #397272;
+  text-align: left;
+  cursor: pointer;
+}
+
+.panel-lateral-capitulo > button:hover {
+  background: #d9f1ef;
+}
+
+.lore-ayuda-capitulo {
+  margin-top: 25px;
+  padding: 17px 10px;
+  border-radius: 12px;
+  background: #e3f7f5;
+  text-align: center;
+  color: #288e90;
+}
+
+.lore-ayuda-capitulo span {
+  display: block;
+  font-size: 32px;
+  margin-bottom: 7px;
+}
+
+.lore-ayuda-capitulo p {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ESTADOS */
+
+.estado-capitulo {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1050px) {
+  .estructura-capitulo {
+    grid-template-columns: 190px minmax(250px, 1fr);
+  }
+
+  .panel-lateral-capitulo {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .panel-lateral-capitulo > button {
+    flex: 1 1 140px;
+  }
+
+  .lore-ayuda-capitulo {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 650px) {
+  .cabecera-capitulo {
+    padding: 13px;
+  }
+
+  .acciones-capitulo {
+    width: 100%;
+  }
+
+  .acciones-capitulo button {
+    flex: 1;
+  }
+
+  .estructura-capitulo {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .indice-capitulos {
+    grid-column: 1;
+  }
+
+  .zona-escritura-capitulo {
+    padding: 14px;
+  }
+
+  .area-escritura-capitulo {
+    min-height: 400px;
+  }
+}
+
+
+.opciones-monetizacion {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #d8e5e3;
+  border-radius: 12px;
+}
+
+.opciones-monetizacion h2 {
+  margin-top: 0;
+}
+
+.opcion-monetizacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 18px 0;
+  border-top: 1px solid #ddd;
+}
+
+.opcion-monetizacion p {
+  margin: 6px 0;
+}
+
+.opcion-monetizacion small {
+  color: #15988c;
+}
+
+.opcion-monetizacion button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 7px;
+  background: #20a99c;
+  color: white;
+  cursor: pointer;
+}
+
+.aviso-fanfic-monetizacion {
+  padding: 18px;
+  margin: 15px 0;
+  border: 1px solid #e2c7a4;
+  border-radius: 10px;
+  background: #fff8ed;
+}
+
+.aviso-fanfic-monetizacion strong {
+  color: #a56828;
+}
+
+.aviso-fanfic-monetizacion p {
+  margin: 8px 0;
+}

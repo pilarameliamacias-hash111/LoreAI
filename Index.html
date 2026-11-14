@@ -15,43 +15,290 @@
     <body>
         
         <header> 
-            <nav>
-             <a href="#">LoreAI</a>
-             <a href="#">INICIO</a>
-              <a href="#">EXPLORAR</a>
-             <a href="#">INICIAR SESIÓN</a>
-    
-            </nav>
-        </header>
+            
+<nav>
+    <a href="index.html" class="logo-loreai">
+        <img
+            src="./imágenes/-LOREAI LOGO Y AJÁ.png"
+            alt="LoreAI - Inicio"
+        >
+    </a>
 
-<section class="portada">
-    <h1>Bienvenido a LoreAI, estrellita</h1>
-    <p>Quédate a leer y escribir con nosotros</p>
-    <p>LoreAI no es todo. Somos todos.</p>
-    <button>Comenzar a escribir</button>
+    <a href="#inicio">INICIO</a>
+    <a href="#explorar">EXPLORAR</a>
+    <a href="#" id="enlace-consola">CONSOLA</a>
+    <a href="#" id="abrir-inicio-sesion">INICIAR SESIÓN</a>
+</nav>
+ 
+</header>
 
-<div class="historias">
 
-    <article>
-        <h3>Historia 1</h3>
-        <p>Descripción de la historia</p>
-         <p>Autor: Nombre del autor</p>
-     <button>Leer</button>
-    </article>
+<!-- BIENVENIDA PRINCIPAL -->
+<section class="portada" id="inicio">
+    <div class="portada-contenido">
+        <div class="portada-texto">
+            <p class="portada-etiqueta">TU PRÓXIMA HISTORIA COMIENZA AQUÍ</p>
 
-    <article>
-        <h3>Historia 2</h3>
-        <p>Descripción de la historia</p>
-    </article>
+            <h1>Bienvenido a LoreAI, estrellita ✨</h1>
 
-    <article>
-        <h3>Proyecto de la comunidad</h3>
-        <p>Descripción del proyecto</p>
-    </article>
+            <p class="portada-descripcion">
+                Quédate a leer, imaginar y escribir con nosotros.
+            </p>
 
+            <p class="portada-slogan">
+                Encontramos la estrella y la ayudamos a brillar.
+            </p>
+
+            <button id="comenzar" type="button">
+                Comenzar a escribir ✨
+            </button>
+        </div>
+
+        <div class="portada-mascota">
+            <img src="./imágenes/Lore-Chan.Otravez.png"
+     class="lore-chan"
+     alt="Lore-Chan">
+        </div>
+    </div>
+</section>
+
+<!-- HISTORIAS PARA DESCUBRIR -->
+<section class="historias" id="explorar">
+    <h2>Un universo de historias te espera ✨</h2>
+    <p>Encuentra tu próxima lectura favorita.</p>
+
+    <div class="carrusel-historias">
+        <article>
+            <h3>Historia 1</h3>
+            <p>Descripción de la historia</p>
+            <p>Autor: Nombre del autor</p>
+            <button type="button">Leer</button>
+        </article>
+
+        <article>
+            <h3>Historia 2</h3>
+            <p>Descripción de la historia</p>
+            <p>Autor: Nombre del autor</p>
+            <button type="button">Leer</button>
+        </article>
+
+        <article>
+            <h3>Proyecto de la comunidad</h3>
+            <p>Descripción del proyecto</p>
+            <p>Autor: Comunidad LoreAI</p>
+            <button type="button">Leer</button>
+        </article>
+    </div>
+</section>
+
+<!-- ANIMACIÓN DE BIENVENIDA: CONSERVAR LOS IDENTIFICADORES -->
+<div id="animacion-bienvenida" hidden>
+    <video id="video-bienvenida" autoplay playsinline preload="auto">
+        <source src="videos/Bienvenido.mp4" type="video/mp4">
+        Tu navegador no puede reproducir este video.
+    </video>
+
+    <button id="omitir-animacion" type="button">
+        Omitir ⏭
+    </button>
 </div>
 
+<!-- VENTANA DE BIENVENIDA EXISTENTE -->
+<div id="bienvenida">
+    <div class="ventana">
+        <button id="cerrar" type="button">X</button>
+        <h2>¡Bienvenida a LoreAI! ✨</h2>
+        <p>Aquí aparecerá Lore-Chan.</p>
+    </div>
+</div>
+
+
+
+<!-- ACCESO A LOREAI -->
+
+<div id="acceso-loreai" class="modal-acceso" hidden>
+    <div class="contenido-acceso">
+
+        <button
+            id="cerrar-acceso"
+            class="cerrar-acceso"
+            aria-label="Cerrar ventana"
+            type="button"
+        >×</button>
+
+        <h2>¿Ya tienes cuenta?</h2>
+
+        <p>
+            ¡Nos alegra tenerte por aquí, estrellita!
+            ¿Ya formas parte de LoreAI?
+        </p>
+
+        <button id="acceso-si" type="button">
+            Sí, ya tengo cuenta
+        </button>
+
+        <button id="acceso-no" type="button">
+            Aún no, quiero registrarme
+        </button>
+
+        <p id="mensaje-acceso" hidden></p>
+
+    </div>
+</div>
+
+
+<!-- INICIO DE SESIÓN DE LOREAI -->
+<div id="login-loreai" class="modal-acceso" hidden>
+    <div class="contenido-acceso">
+
+        <button
+            id="cerrar-login"
+            class="cerrar-acceso"
+            type="button"
+            aria-label="Cerrar inicio de sesión"
+        >×</button>
+
+        <h2>¡Qué bueno verte de nuevo! ⭐</h2>
+        <p>Inicia sesión para entrar a tu Consola de LoreAI.</p>
+
+        <form id="formulario-login">
+            <label for="login-identificador">Usuario o correo electrónico</label>
+            <input
+                id="login-identificador"
+                name="identificador"
+                type="text"
+                autocomplete="username"
+                required
+            >
+
+            <label for="login-contrasena">Contraseña</label>
+            <input
+                id="login-contrasena"
+                name="contrasena"
+                type="password"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit">Iniciar sesión</button>
+        </form>
+
+        <p id="mensaje-login" role="status" hidden></p>
+
+        <button id="volver-registro" type="button">
+            Aún no tengo cuenta
+        </button>
+
+    </div>
+</div>
+
+
+<!-- REGISTRO DE LOREAI -->
+
+<div id="registro-loreai" class="modal-acceso" hidden>
+    <div class="contenido-acceso">
+
+        <button
+            id="cerrar-registro"
+            class="cerrar-acceso"
+            type="button"
+            aria-label="Cerrar registro"
+        >×</button>
+
+        <h2>¡Únete a LoreAI! ⭐</h2>
+
+        <p>
+            ¡Qué alegría conocer una nueva estrellita!
+            Crea tu cuenta para comenzar.
+        </p>
+
+        <form id="formulario-registro">
+
+            <label for="registro-usuario">Nombre de usuario</label>
+            <input
+                id="registro-usuario"
+                name="usuario"
+                type="text"
+                autocomplete="username"
+                required
+                minlength="3"
+            >
+
+            <label for="registro-correo">Correo electrónico</label>
+            <input
+                id="registro-correo"
+                name="correo"
+                type="email"
+                autocomplete="email"
+                required
+            >
+
+            <label for="registro-contrasena">Contraseña</label>
+            <input
+                id="registro-contrasena"
+                name="contrasena"
+                type="password"
+                autocomplete="new-password"
+                required
+                minlength="8"
+            >
+
+            <button type="submit">Crear mi cuenta</button>
+
+        </form>
+
+        <p id="mensaje-registro" role="status" hidden></p>
+
+        <button id="volver-acceso" type="button">
+            Ya tengo cuenta
+        </button>
+
+    </div>
+</div>
+
+<!-- Aquí se conectan los scripts que ya utiliza LoreAI -->
+<script src="script.js"></script>
+
+
+
+<!-- Lore-Chan: botón flotante -->
+<button id="lore-launcher" class="lore-launcher" aria-label="Abrir chat de Lore-Chan">
+  <span class="lore-star">★</span>
+</button>
+
+<!-- Ventana del chat -->
+<section id="lore-chat" class="lore-chat" aria-label="Chat de Lore-Chan" hidden>
+  <header class="lore-header">
+    <div class="lore-avatar">★</div>
+    <div class="lore-heading">
+      <strong>Lore-Chan</strong>
+      <small>Cyber asistente de LoreAI</small>
+    </div>
+    <button type="button" id="lore-minimize" aria-label="Minimizar">−</button>
+    <button type="button" id="lore-expand" aria-label="Cambiar tamaño">□</button>
+    <button type="button" id="lore-close" aria-label="Cerrar">×</button>
+  </header>
+
+  <div id="lore-messages" class="lore-messages" aria-live="polite">
+    <p class="lore-disclaimer">
+      Saluda a Lore-Chan, nuestra cyber asistente. Recuerda:
+      aunque es muy amigable y fabulosa, es solo un bot y puede cometer errores.
+    </p>
+  </div>
+
+  <form id="lore-form" class="lore-form">
+    <input
+      id="lore-input"
+      type="text"
+      placeholder="Escribe tu mensaje..."
+      autocomplete="off"
+      aria-label="Escribe tu mensaje"
+    />
+    <button type="submit" aria-label="Enviar mensaje">➤</button>
+  </form>
 </section>
+
+<script src="lore-chan.js"></script>
 
 </body>
 

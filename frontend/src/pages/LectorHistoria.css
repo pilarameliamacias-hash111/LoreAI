@@ -1,0 +1,250 @@
+
+.pagina-lector {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #333333;
+  font-family: Arial, sans-serif;
+}
+
+.encabezado-lector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 6%;
+  background: #36aaaa;
+}
+
+.encabezado-lector img {
+  width: 130px;
+  object-fit: contain;
+}
+
+.encabezado-lector button {
+  padding: 10px 18px;
+  border: 1px solid white;
+  border-radius: 8px;
+  background: white;
+  color: #218f90;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.contenido-lector {
+  display: grid;
+  grid-template-columns: minmax(220px, 340px) 1fr;
+  gap: 45px;
+  max-width: 1100px;
+  margin: 55px auto;
+  padding: 0 25px;
+}
+
+.portada-lector img,
+.portada-sin-imagen {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 5px 18px #00000018;
+}
+
+.portada-sin-imagen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f7f7;
+  color: #218f90;
+  font-size: 22px;
+}
+
+.informacion-lector h1 {
+  margin-top: 0;
+  color: #218f90;
+  font-size: 36px;
+}
+
+.descripcion-lector {
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.etiquetas-lector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 20px 0;
+}
+
+.etiquetas-lector span {
+  padding: 7px 13px;
+  border-radius: 20px;
+  background: #e3f5f5;
+  color: #218f90;
+  font-size: 13px;
+}
+
+.datos-lector {
+  margin: 25px 0;
+  line-height: 1.6;
+}
+
+.boton-autor-lector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #dceeee;
+  border-radius: 12px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.boton-autor-lector img,
+.avatar-sin-foto {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-sin-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dff4f4;
+  color: #218f90;
+}
+
+.boton-autor-lector span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.boton-autor-lector small {
+  color: #777777;
+}
+
+.boton-autor-lector strong {
+  color: #218f90;
+}
+
+.acciones-lector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.acciones-lector button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.boton-leer {
+  background: #36aaaa;
+  color: white;
+}
+
+.boton-indice {
+  background: #e3f5f5;
+  color: #218f90;
+}
+
+.indice-lector {
+  margin-top: 25px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #f2fafa;
+}
+
+.indice-lector h2 {
+  color: #218f90;
+}
+
+.indice-lector li {
+  margin: 10px 0;
+}
+
+@media (max-width: 700px) {
+  .contenido-lector {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-top: 30px;
+  }
+
+  .portada-lector {
+    max-width: 280px;
+    margin: auto;
+  }
+
+  .informacion-lector h1 {
+    font-size: 28px;
+  }
+}
+
+.menu-opciones-lector {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.boton-tres-puntos {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #e3f5f5;
+  color: #218f90;
+  font-size: 28px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.boton-tres-puntos:hover {
+  background: #c8eeee;
+}
+
+.desplegable-lector {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  z-index: 10;
+  width: 230px;
+  padding: 8px;
+  background: white;
+  border: 1px solid #dceeee;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px #00000018;
+}
+
+.desplegable-lector button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #444444;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.desplegable-lector button:hover {
+  background: #eaf7f7;
+  color: #218f90;
+}
+
+.desplegable-lector button span {
+  width: 20px;
+  color: #218f90;
+  font-size: 18px;
+  text-align: center;
+}
