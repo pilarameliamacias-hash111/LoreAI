@@ -13,6 +13,8 @@ function LoreChat({ usuario, pantalla, historiaId }) {
 
 const usuarioAutenticado = Boolean(usuario)
 
+const modoGeneral = usuarioAutenticado && pantalla === 'inicio' && !historiaId
+
 const [mensajes, setMensajes] = useState([])
 
 const [posicion, setPosicion] = useState(null)
@@ -23,8 +25,22 @@ console.log('LORECHAT - Autenticado:', usuarioAutenticado)
 console.log('LORECHAT - Historia ID:', historiaId)
 console.log('LORECHAT - Mensajes:', mensajes)
 
+console.log('LORECHAT - Pantalla:', pantalla)
+console.log('LORECHAT - Modo general:', modoGeneral)
+
 const referenciaArrastre = useRef(null)
 
+const mensajesFinRef = useRef(null)
+
+// Desplazar el chat hasta el mensaje más reciente.
+useEffect(() => {
+  if (abierto && !minimizado) {
+    mensajesFinRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end'
+    })
+  }
+}, [mensajes, generando, abierto, minimizado])
 
 useEffect(() => {
   let cancelado = false
@@ -32,14 +48,19 @@ useEffect(() => {
   setMensajes([])
   setHistoriaCargadaId(null)
 
-  if (!usuarioAutenticado || !historiaId) return
+  if (!usuarioAutenticado) return
 
   async function cargarHistorial() {
     try {
-      const respuesta = await fetch(
-        `http://localhost:3000/api/lorechat?historiaId=${encodeURIComponent(historiaId)}`,
-        { credentials: 'include' }
-      )
+
+      // Elegimos qué conversación recuperar.
+      const url = modoGeneral
+        ? 'http://localhost:3000/api/lorechat/general'
+        : `http://localhost:3000/api/lorechat?historiaId=${encodeURIComponent(historiaId)}`
+
+      const respuesta = await fetch(url, {
+        credentials: 'include'
+      })
 
       if (!respuesta.ok) {
         throw new Error('No se pudo recuperar la conversación.')
@@ -49,57 +70,86 @@ useEffect(() => {
 
       if (!cancelado) {
         setMensajes(Array.isArray(datos) ? datos : [])
-        setHistoriaCargadaId(String(historiaId))
+
+        // Identificamos qué historial acabamos de cargar.
+        setHistoriaCargadaId(
+          modoGeneral ? 'general' : String(historiaId)
+        )
       }
+
     } catch (error) {
       console.error('Error al cargar LoreChat:', error)
     }
   }
+
+  // Si no estamos en Inicio ni dentro de una historia,
+  // no hay una conversación que recuperar.
+  if (!modoGeneral && !historiaId) return
 
   cargarHistorial()
 
   return () => {
     cancelado = true
   }
-}, [historiaId, usuarioAutenticado])
+
+}, [historiaId, usuarioAutenticado, modoGeneral])
+
+
 
 
 useEffect(() => {
+
+  const identificadorConversacion = modoGeneral
+    ? 'general'
+    : String(historiaId)
+
   if (
     !usuarioAutenticado ||
-    !historiaId ||
-    historiaCargadaId !== String(historiaId)
+    (!modoGeneral && !historiaId) ||
+    historiaCargadaId !== identificadorConversacion
   ) {
     return
   }
 
   async function guardarHistorial() {
     try {
-      const respuesta = await fetch(
-        'http://localhost:3000/api/lorechat',
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            historiaId,
-            mensajes
-          })
-        }
-      )
+
+      const url = modoGeneral
+        ? 'http://localhost:3000/api/lorechat/general'
+        : 'http://localhost:3000/api/lorechat'
+
+      const datosConversacion = modoGeneral
+        ? { mensajes }
+        : { historiaId, mensajes }
+
+      const respuesta = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(datosConversacion)
+      })
 
       if (!respuesta.ok) {
         throw new Error('No se pudo guardar la conversación.')
       }
+
     } catch (error) {
       console.error('Error al guardar LoreChat:', error)
     }
   }
 
   guardarHistorial()
-}, [mensajes, historiaId, historiaCargadaId, usuarioAutenticado])
+
+}, [
+  mensajes,
+  historiaId,
+  historiaCargadaId,
+  usuarioAutenticado,
+  modoGeneral
+])
+
 
 
 
@@ -255,6 +305,7 @@ function responder(texto) {
 
 
   
+
 async function enviarMensaje(evento) {
   evento.preventDefault()
 
@@ -275,9 +326,9 @@ async function enviarMensaje(evento) {
     mensajeUsuario
   ])
 
-  // Si tiene sesión y está dentro de una historia,
-  // utilizamos la inteligencia artificial.
-  if (usuarioAutenticado && historiaId) {
+  // Los usuarios autenticados pueden utilizar la IA
+  // tanto en Inicio como dentro de una historia.
+  if (usuarioAutenticado && (modoGeneral || historiaId)) {
     setGenerando(true)
 
     try {
@@ -286,20 +337,24 @@ async function enviarMensaje(evento) {
         mensajeUsuario
       ]
 
-      const respuesta = await fetch(
-        'http://localhost:3000/api/lorechat/responder',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            historiaId,
-            mensajes: historialParaIA
-          })
-        }
-      )
+      // Elegimos la ruta de IA según el contexto.
+      const url = modoGeneral
+        ? 'http://localhost:3000/api/lorechat/general/responder'
+        : 'http://localhost:3000/api/lorechat/responder'
+
+      // Enviamos los datos correspondientes.
+      const datosConversacion = modoGeneral
+        ? { mensajes: historialParaIA }
+        : { historiaId, mensajes: historialParaIA }
+
+      const respuesta = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(datosConversacion)
+      })
 
       if (!respuesta.ok) {
         throw new Error('No se pudo obtener una respuesta.')
@@ -337,8 +392,8 @@ async function enviarMensaje(evento) {
     return
   }
 
-  // Los visitantes y usuarios fuera de una historia
-  // conservan el sistema de respuestas predefinidas.
+  // Los visitantes y usuarios fuera de los contextos
+  // compatibles con IA conservan las respuestas predefinidas.
   const respuesta = responder(texto)
 
   setMensajes((anteriores) => [
@@ -351,11 +406,25 @@ async function enviarMensaje(evento) {
 }
 
 
+
   function cerrarChat() {
     setAbierto(false)
     setMinimizado(false)
     setExpandido(false)
   }
+
+
+function reiniciarChat() {
+  setMensajes([
+    {
+      texto: '¡Hola! Soy Lore-Chan. ⭐ ¿Qué te gustaría conversar?',
+      tipo: 'bot'
+    }
+  ])
+
+  setSaludoMostrado(true)
+}
+
 
   return (
     <>
@@ -398,6 +467,21 @@ async function enviarMensaje(evento) {
               <strong>Lore-Chan</strong>
               <small>Cyber asistente de LoreAI</small>
             </div>
+
+
+{modoGeneral && (
+  <button
+  className="lore-reset"
+  type="button"
+  title="Reiniciar conversación"
+  aria-label="Reiniciar conversación"
+  onClick={reiniciarChat}
+  disabled={historiaCargadaId !== 'general'}
+>
+  ↻
+</button>
+)}
+
 
             <button
               type="button"
@@ -453,6 +537,8 @@ async function enviarMensaje(evento) {
                     Lore-Chan está pensando... ⭐
                   </div>
                 )}
+
+                <div ref={mensajesFinRef} />
 
               </div>
 

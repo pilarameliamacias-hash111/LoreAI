@@ -206,3 +206,21 @@
 .lore-header:active {
   cursor: grabbing;
 }
+
+.lore-reset {
+  color: #20b2aa !important;
+  font-size: 23px !important;
+  font-weight: bold;
+  border-radius: 50%;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.lore-reset:hover {
+  background: #ccefe9;
+  transform: rotate(-45deg);
+}
+
+.lore-reset:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
