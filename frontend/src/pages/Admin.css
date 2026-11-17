@@ -1,0 +1,134 @@
+
+.panel-admin {
+  min-height: 100vh;
+  padding: 35px;
+  background: #f3fbfa;
+  color: #263b3b;
+  font-family: Arial, sans-serif;
+}
+
+.admin-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 30px;
+  background: linear-gradient(120deg, #20b2aa, #66c7c0);
+  color: white;
+  border-radius: 18px;
+  box-shadow: 0 5px 18px rgba(32, 178, 170, 0.18);
+}
+
+.admin-encabezado p {
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.admin-encabezado h1 {
+  margin: 10px 0;
+  font-size: 30px;
+}
+
+.admin-encabezado span {
+  font-size: 14px;
+}
+
+.admin-encabezado button,
+.admin-error button {
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: white;
+  color: #168e88;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-encabezado button:hover,
+.admin-error button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.admin-contenido {
+  margin-top: 35px;
+}
+
+.admin-contenido h2 {
+  color: #168e88;
+  font-size: 25px;
+}
+
+.admin-contenido > p {
+  color: #667777;
+  line-height: 1.6;
+}
+
+.admin-modulos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 28px;
+}
+
+.admin-modulos article {
+  padding: 25px;
+  background: white;
+  border: 1px solid #dceeed;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-modulos article:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(32, 178, 170, 0.12);
+}
+
+.admin-modulos h3 {
+  color: #168e88;
+  margin-top: 0;
+}
+
+.admin-modulos p {
+  color: #687878;
+  line-height: 1.5;
+}
+
+.admin-cargando,
+.admin-error {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 25px;
+  background: #f3fbfa;
+  text-align: center;
+}
+
+.admin-error h2 {
+  color: #c04c58;
+}
+
+@media (max-width: 750px) {
+  .panel-admin {
+    padding: 18px;
+  }
+
+  .admin-encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-encabezado h1 {
+    font-size: 24px;
+  }
+
+  .admin-modulos {
+    grid-template-columns: 1fr;
+  }
+}

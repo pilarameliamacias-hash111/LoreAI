@@ -17,6 +17,27 @@ if (!process.env.SESSION_SECRET) {
 }
 
 const app = express();
+function verificarAdmin(req, res, next) {
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const usuarios = cargarUsuarios();
+
+    const usuario = usuarios.find(
+        u => u.id === req.session.usuarioId
+    );
+
+    if (!usuario || usuario.rol !== "admin") {
+        return res.status(403).json({
+            error: "No tienes permisos para acceder a esta sección."
+        });
+    }
+
+    next();
+}
 app.disable("etag");
 app.use("/backend", (req, res) => {
     res.sendStatus(404);
@@ -1274,9 +1295,12 @@ if (usuarioEncontrado) {
             .toString("hex");
 
         const nuevoUsuario = {
-            id: crypto.randomUUID(),
+    id: crypto.randomUUID(),
 
-            usuario: nombre,
+    rol: "usuario",
+
+    usuario: nombre,
+
             correo: email,
 
             sal,
@@ -1460,6 +1484,8 @@ console.log("Usuario en sesión:", req.session.usuarioId);
             id: cuenta.id,
             usuario: cuenta.usuario,
             correo: cuenta.correo,
+
+                        rol: cuenta.rol || "usuario",
 
             nombrePublico: perfil.nombrePublico || "",
             cumpleanos: perfil.cumpleanos || {
@@ -1687,6 +1713,16 @@ app.put("/api/lorechat/general", (req, res) => {
 
 });
 
+// ==============================
+// PANEL DE ADMINISTRACIÓN
+// ==============================
+
+app.get("/api/admin/verificar", verificarAdmin, (req, res) => {
+    res.json({
+        autorizado: true,
+        mensaje: "Acceso administrativo autorizado."
+    });
+});
 
 // ==============================
 // ACTUALIZAR PERFIL

@@ -14,7 +14,7 @@ import RecomendadoParaTi from "./components/RecomendadoParaTi";
 import LeerHistoria from './pages/LeerHistoria'
 import HistoriasPopulares from './components/HistoriasPopulares'
 import Contacto from './components/Contacto'
-
+import Admin from './pages/Admin'
 
 function App() {
   const generos = [
@@ -37,6 +37,7 @@ function abrirAcceso() {
 const [mostrarAcceso, setMostrarAcceso] = useState(false)
 const [destinoDespuesAcceso, setDestinoDespuesAcceso] = useState(null)
 const [mostrarConsola, setMostrarConsola] = useState(false)
+const [mostrarAdmin, setMostrarAdmin] = useState(false)
 const [mostrarCrearHistoria, setMostrarCrearHistoria] = useState(false)
 const [mostrarEditorHistoria, setMostrarEditorHistoria] = useState(false)
 const [mostrarLector, setMostrarLector] = useState(false)
@@ -213,6 +214,13 @@ alEditarHistoria={(id) => {
 }}
   />
 
+  ) : mostrarAdmin && usuarioActual?.rol === 'admin' ? (
+
+  <Admin
+    usuario={usuarioActual}
+    alVolver={() => setMostrarAdmin(false)}
+  />
+
 ) : mostrarPerfilPublico ? (
 
   <PerfilPublico
@@ -369,6 +377,19 @@ setHistoriaEnEdicionId(null)
   {usuarioActual ? 'MI PERFIL' : 'INICIAR SESIÓN'}
 </button>
 
+{usuarioActual?.rol === 'admin' && (
+  <button
+    type="button"
+    onClick={() => {
+      setMenuAbierto(false)
+      setMostrarPerfil(false)
+      setMostrarAdmin(true)
+    }}
+  >
+    ADMINISTRACIÓN ⭐
+  </button>
+)}
+
   <button
   type="button"
   onClick={() => {
@@ -511,7 +532,6 @@ setHistoriaEnEdicionId(null)
       >
         BUSCAR ✨
       </button>
-
     </div>
   )}
 
