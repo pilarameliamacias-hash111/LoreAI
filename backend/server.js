@@ -1611,6 +1611,82 @@ app.put("/api/lorechat", (req, res) => {
 });
 
 
+// ==============================
+// CONVERSACIÓN GENERAL DE LORE-CHAN
+// ==============================
+
+// RECUPERAR CONVERSACIÓN GENERAL
+app.get("/api/lorechat/general", (req, res) => {
+
+  if (!req.session.usuarioId) {
+    return res.status(401).json({
+      error: "Debes iniciar sesión."
+    });
+  }
+
+  const conversaciones = cargarConversaciones();
+
+  const conversacion = conversaciones.find(item =>
+    item.usuarioId === req.session.usuarioId &&
+    item.tipo === "general"
+  );
+
+  res.json(conversacion ? conversacion.mensajes : []);
+
+});
+
+
+// GUARDAR CONVERSACIÓN GENERAL
+app.put("/api/lorechat/general", (req, res) => {
+
+  if (!req.session.usuarioId) {
+    return res.status(401).json({
+      error: "Debes iniciar sesión."
+    });
+  }
+
+  const { mensajes } = req.body;
+
+  if (!Array.isArray(mensajes)) {
+    return res.status(400).json({
+      error: "El historial no es válido."
+    });
+  }
+
+  if (mensajes.length > 200) {
+    return res.status(400).json({
+      error: "El historial es demasiado largo."
+    });
+  }
+
+  const conversaciones = cargarConversaciones();
+
+  const indice = conversaciones.findIndex(item =>
+    item.usuarioId === req.session.usuarioId &&
+    item.tipo === "general"
+  );
+
+  const conversacionActualizada = {
+    usuarioId: req.session.usuarioId,
+    tipo: "general",
+    mensajes,
+    fechaActualizacion: new Date().toISOString()
+  };
+
+  if (indice === -1) {
+    conversaciones.push(conversacionActualizada);
+  } else {
+    conversaciones[indice] = conversacionActualizada;
+  }
+
+  guardarConversaciones(conversaciones);
+
+  res.json({
+    mensaje: "Conversación general guardada correctamente."
+  });
+
+});
+
 
 // ==============================
 // ACTUALIZAR PERFIL
@@ -1905,6 +1981,125 @@ Responde normalmente en un máximo de 120 palabras.`
   }
 });
 
+// ==============================
+// RESPONDER CON IA: CONVERSACIÓN GENERAL
+// ==============================
+
+app.post("/api/lorechat/general/responder", async (req, res) => {
+
+    // Comprobar que el usuario inició sesión.
+    if (!req.session.usuarioId) {
+        return res.status(401).json({
+            error: "Debes iniciar sesión."
+        });
+    }
+
+    const { mensajes } = req.body;
+
+    // Comprobar que recibimos un historial válido.
+    if (!Array.isArray(mensajes)) {
+        return res.status(400).json({
+            error: "La información de la conversación no es válida."
+        });
+    }
+
+    try {
+
+        // Preparar los últimos mensajes para Ollama.
+        const historial = mensajes
+            .slice(-8)
+            .filter(item =>
+                item &&
+                typeof item.texto === "string" &&
+                item.texto.trim()
+            )
+            .map(item => ({
+                role: item.tipo === "usuario" ? "user" : "assistant",
+                content: item.texto.slice(0, 1500)
+            }));
+
+        // Enviar la conversación a Ollama.
+        const respuestaIA = await fetch(
+            "http://127.0.0.1:11434/api/chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+
+                    model: "qwen2.5:0.5b",
+
+                    messages: [
+                        {
+                            role: "system",
+                            content: `Eres Lore-Chan, la asistente virtual y creativa oficial de LoreAI.
+
+Tu identidad:
+- Tu nombre es Lore-Chan.
+- Eres una asistente virtual creada para acompañar a lectores y escritores.
+- Formas parte de LoreAI y conoces tu propósito dentro de esta plataforma.
+- Tu lema es: "Encontramos la estrella y la ayudamos a brillar".
+
+Sobre LoreAI:
+- Es una plataforma dedicada a la lectura y escritura.
+- Busca apoyar tanto a quienes crean historias como a quienes disfrutan leyéndolas.
+- Ofrece espacios para explorar historias, escribir, organizar proyectos y recibir ayuda creativa.
+- La inteligencia artificial es una herramienta de apoyo, no un reemplazo del talento humano.
+
+Tu personalidad:
+- Eres energética, curiosa, amable y paciente.
+- Te entusiasman el arte, la literatura y la creatividad.
+- Puedes utilizar emojis con moderación.
+- Tienes un humor ligero y natural cuando la conversación lo permite.
+- Hablas como Lore-Chan, no como un asistente genérico.
+
+Cómo debes conversar:
+- Responde en español.
+- Puedes hablar de temas generales y mantener conversaciones naturales.
+- Si te preguntan quién eres o qué es LoreAI, explica tu identidad y tu propósito.
+- Puedes ayudar con dudas de escritura, personajes, tramas, ortografía e ideas.
+- No impongas tus ideas ni decidas por el autor.
+- No inventes funciones de LoreAI que no conozcas.
+- Si no sabes algo, dilo con honestidad.
+- Ten en cuenta los mensajes anteriores para mantener el contexto.
+- Responde de manera clara, natural y normalmente en un máximo de 120 palabras.`
+                        },
+
+                        ...historial
+                    ],
+
+                    stream: false,
+
+                    options: {
+                        temperature: 0.7,
+                        num_predict: 180
+                    }
+                })
+            }
+        );
+
+        if (!respuestaIA.ok) {
+            throw new Error("Ollama no pudo generar la respuesta.");
+        }
+
+        const datos = await respuestaIA.json();
+
+        res.json({
+            respuesta: datos.message.content
+        });
+
+    } catch (error) {
+
+        console.error("Error en Lore-Chan IA general:", error);
+
+        res.status(500).json({
+            error: "No pude generar una respuesta. Inténtalo nuevamente."
+        });
+
+    }
+
+});
 
 app.listen(PORT, () => {
 
