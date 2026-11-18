@@ -11,6 +11,8 @@ function Contacto() {
   })
 
   const [enviado, setEnviado] = useState(false)
+const [cargando, setCargando] = useState(false)
+const [error, setError] = useState('')
 
   function manejarCambio(e) {
     const { name, value } = e.target
@@ -23,10 +25,28 @@ function Contacto() {
     setEnviado(false)
   }
 
-  function manejarEnvio(e) {
-    e.preventDefault()
+  async function manejarEnvio(e) {
+  e.preventDefault()
 
-    // Demostración: no envía ni almacena información.
+  setCargando(true)
+  setEnviado(false)
+  setError('')
+
+  try {
+    const respuesta = await fetch('http://localhost:3000/api/contacto', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formulario)
+    })
+
+    const datos = await respuesta.json()
+
+    if (!respuesta.ok) {
+      throw new Error(datos.mensaje || 'No se pudo enviar el mensaje.')
+    }
+
     setEnviado(true)
 
     setFormulario({
@@ -35,7 +55,13 @@ function Contacto() {
       motivo: 'Reporte',
       mensaje: ''
     })
+
+  } catch (error) {
+    setError(error.message || 'No se pudo conectar con el servidor.')
+  } finally {
+    setCargando(false)
   }
+}
 
   return (
     <section className="seccion-contacto" id="contacto">
@@ -97,16 +123,22 @@ function Contacto() {
             required
           />
 
-          <button type="submit">
-            Enviar mensaje ✨
-          </button>
+          <button type="submit" disabled={cargando}>
+  {cargando ? 'Enviando...' : 'Enviar mensaje ✨'}
+</button>
 
           {enviado && (
-            <p className="confirmacion-contacto" role="status">
-              ¡Gracias por comunicarte con LoreAI! ✨
-              Esta es una demostración: tu mensaje no ha sido enviado.
-            </p>
-          )}
+  <p className="confirmacion-contacto" role="status">
+    ¡Gracias por comunicarte con LoreAI! ✨
+    Tu mensaje ha sido recibido.
+  </p>
+)}
+
+{error && (
+  <p className="error-contacto" role="alert">
+    {error}
+  </p>
+)}
 
         
         </form>

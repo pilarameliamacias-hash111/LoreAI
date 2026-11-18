@@ -50,6 +50,10 @@ const archivoConversaciones = path.join(
     __dirname,
     "conversaciones.json"
 );
+const archivoMensajes = path.join(
+    __dirname,
+    "mensajes.json"
+);
 function cargarUsuarios() {
     try {
         const contenido = fs.readFileSync(archivoUsuarios, "utf8");
@@ -84,6 +88,33 @@ function cargarConversaciones() {
     }
 }
 
+function cargarMensajes() {
+    try {
+        if (!fs.existsSync(archivoMensajes)) {
+            fs.writeFileSync(
+                archivoMensajes,
+                "[]",
+                "utf8"
+            );
+        }
+
+        return JSON.parse(
+            fs.readFileSync(archivoMensajes, "utf8")
+        );
+    } catch (error) {
+        console.error("Error al leer mensajes:", error);
+        return [];
+    }
+}
+
+function guardarMensajes(mensajes) {
+    fs.writeFileSync(
+        archivoMensajes,
+        JSON.stringify(mensajes, null, 2),
+        "utf8"
+    );
+}
+
 function guardarConversaciones(conversaciones) {
     fs.writeFileSync(
         archivoConversaciones,
@@ -116,6 +147,73 @@ app.use(cors({
     },
     credentials: true
 }));
+
+app.use(express.json({ limit: "5mb" }));
+
+app.use(session({
+    name: "loreai.sid",
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 2
+    }
+}));
+
+app.post("/api/contacto", (req, res) => {
+    try {
+        const { nombre, correo, motivo, mensaje } = req.body;
+
+        if (!nombre || !correo || !motivo || !mensaje) {
+            return res.status(400).json({
+                mensaje: "Todos los campos son obligatorios."
+            });
+        }
+
+        const mensajes = cargarMensajes();
+
+        const nuevoMensaje = {
+            id: crypto.randomUUID(),
+            nombre: nombre.trim(),
+            correo: correo.trim(),
+            motivo,
+            mensaje: mensaje.trim(),
+            fecha: new Date().toISOString(),
+            leido: false
+        };
+
+        mensajes.push(nuevoMensaje);
+        guardarMensajes(mensajes);
+
+        return res.status(201).json({
+            mensaje: "Tu mensaje fue recibido correctamente."
+        });
+
+    } catch (error) {
+        console.error("Error al guardar el mensaje:", error);
+
+        return res.status(500).json({
+            mensaje: "No se pudo guardar tu mensaje."
+        });
+    }
+});
+
+app.get("/api/admin/mensajes", verificarAdmin, (req, res) => {
+    try {
+        const mensajes = cargarMensajes();
+
+        res.json(mensajes);
+    } catch (error) {
+        console.error("Error al consultar mensajes:", error);
+
+        res.status(500).json({
+            mensaje: "No se pudieron cargar los mensajes."
+        });
+    }
+});
 
 app.use(express.json({ limit: "5mb" }));
 
@@ -1723,6 +1821,57 @@ app.get("/api/admin/verificar", verificarAdmin, (req, res) => {
         mensaje: "Acceso administrativo autorizado."
     });
 });
+
+// OBTENER USUARIOS PARA EL PANEL DE ADMINISTRACIÓN
+app.get("/api/admin/usuarios", verificarAdmin, (req, res) => {
+    try {
+        const usuarios = cargarUsuarios();
+
+        const listaUsuarios = usuarios.map(cuenta => ({
+            id: cuenta.id,
+            usuario: cuenta.usuario,
+            correo: cuenta.correo,
+            rol: cuenta.rol || "usuario",
+            fechaRegistro: cuenta.fechaRegistro,
+            nombrePublico: cuenta.perfil?.nombrePublico || cuenta.usuario
+        }));
+
+        res.json(listaUsuarios);
+
+    } catch (error) {
+        console.error("Error al consultar usuarios:", error);
+
+        res.status(500).json({
+            error: "No se pudieron obtener los usuarios."
+        });
+    }
+});
+
+// OBTENER TODAS LAS HISTORIAS PARA EL PANEL DE ADMINISTRACIÓN
+app.get("/api/admin/historias", verificarAdmin, (req, res) => {
+    try {
+        const historias = cargarHistorias();
+
+        const listaHistorias = historias.map(historia => ({
+            id: historia.id,
+            titulo: historia.titulo,
+            creador: historia.creador,
+            genero: historia.genero,
+            fechaCreacion: historia.fechaCreacion,
+            enPapelera: historia.enPapelera || false
+        }));
+
+        res.json(listaHistorias);
+
+    } catch (error) {
+        console.error("Error al consultar historias:", error);
+
+        res.status(500).json({
+            error: "No se pudieron obtener las historias."
+        });
+    }
+});
+
 
 // ==============================
 // ACTUALIZAR PERFIL
