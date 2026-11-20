@@ -167,9 +167,35 @@ app.post("/api/contacto", (req, res) => {
     try {
         const { nombre, correo, motivo, mensaje } = req.body;
 
-        if (!nombre || !correo || !motivo || !mensaje) {
+        if (!motivo || !mensaje || !mensaje.trim()) {
             return res.status(400).json({
-                mensaje: "Todos los campos son obligatorios."
+                mensaje: "El motivo y el mensaje son obligatorios."
+            });
+        }
+
+        const usuarios = cargarUsuarios();
+
+        const usuario = req.session.usuarioId
+            ? usuarios.find(u => u.id === req.session.usuarioId)
+            : null;
+
+        if (req.session.usuarioId && !usuario) {
+            return res.status(401).json({
+                mensaje: "No pudimos verificar tu sesión."
+            });
+        }
+
+        const nombreRemitente = usuario
+            ? usuario.usuario
+            : nombre?.trim();
+
+        const correoRemitente = usuario
+            ? usuario.correo
+            : correo?.trim();
+
+        if (!nombreRemitente || !correoRemitente) {
+            return res.status(400).json({
+                mensaje: "Debes proporcionar tu nombre y correo."
             });
         }
 
@@ -177,12 +203,15 @@ app.post("/api/contacto", (req, res) => {
 
         const nuevoMensaje = {
             id: crypto.randomUUID(),
-            nombre: nombre.trim(),
-            correo: correo.trim(),
+            usuarioId: usuario ? usuario.id : null,
+            nombre: nombreRemitente,
+            correo: correoRemitente,
             motivo,
             mensaje: mensaje.trim(),
             fecha: new Date().toISOString(),
-            leido: false
+            leido: false,
+            estado: "pendiente",
+            respuestas: []
         };
 
         mensajes.push(nuevoMensaje);
@@ -201,6 +230,9 @@ app.post("/api/contacto", (req, res) => {
     }
 });
 
+
+
+// OBTENER MENSAJES PARA EL PANEL DE ADMINISTRACIÓN
 app.get("/api/admin/mensajes", verificarAdmin, (req, res) => {
     try {
         const mensajes = cargarMensajes();
@@ -211,6 +243,63 @@ app.get("/api/admin/mensajes", verificarAdmin, (req, res) => {
 
         res.status(500).json({
             mensaje: "No se pudieron cargar los mensajes."
+        });
+    }
+});
+
+// ACTUALIZAR ESTADO Y ARCHIVO DE UN MENSAJE
+app.patch("/api/admin/mensajes/:id/estado", verificarAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        const { estado, archivado } = req.body;
+
+        const mensajes = cargarMensajes();
+        const mensaje = mensajes.find(m => m.id === id);
+
+        if (!mensaje) {
+            return res.status(404).json({
+                mensaje: "No encontramos ese mensaje."
+            });
+        }
+
+        if (
+            estado !== undefined &&
+            !["pendiente", "atendido"].includes(estado)
+        ) {
+            return res.status(400).json({
+                mensaje: "El estado indicado no es válido."
+            });
+        }
+
+        if (
+            archivado !== undefined &&
+            typeof archivado !== "boolean"
+        ) {
+            return res.status(400).json({
+                mensaje: "El valor de archivo no es válido."
+            });
+        }
+
+        if (estado !== undefined) {
+            mensaje.estado = estado;
+        }
+
+        if (archivado !== undefined) {
+            mensaje.archivado = archivado;
+        }
+
+        guardarMensajes(mensajes);
+
+        return res.json({
+            mensaje: "El mensaje se actualizó correctamente.",
+            mensajeActualizado: mensaje
+        });
+
+    } catch (error) {
+        console.error("Error al actualizar mensaje:", error);
+
+        return res.status(500).json({
+            mensaje: "No se pudo actualizar el mensaje."
         });
     }
 });

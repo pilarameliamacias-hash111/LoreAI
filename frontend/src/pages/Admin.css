@@ -184,3 +184,96 @@
   border-color: #168b8b;
   box-shadow: 0 0 0 3px rgba(22, 139, 139, 0.12);
 }
+
+/* BANDEJAS DE MENSAJES */
+
+.admin-bandejas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0 25px;
+}
+
+.admin-bandejas button {
+  padding: 11px 20px;
+  border: 1px solid #c8e7e6;
+  border-radius: 10px;
+  background: white;
+  color: #168e88;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-bandejas button:hover {
+  background: #e6f8f6;
+}
+
+.admin-bandejas button.activo {
+  background: #20b2aa;
+  color: white;
+  border-color: #20b2aa;
+}
+
+/* ACCIONES DE MENSAJES */
+
+.admin-acciones-mensaje {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.admin-acciones-mensaje p {
+  flex-basis: 100%;
+}
+
+.admin-acciones-mensaje button,
+.admin-usuario > button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 9px;
+  background: #20b2aa;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-acciones-mensaje button:hover,
+.admin-usuario > button:hover {
+  background: #168e88;
+  transform: translateY(-2px);
+}
+
+/* RESPUESTAS */
+
+.admin-usuario textarea {
+  width: 100%;
+  min-height: 100px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid #c8e2df;
+  border-radius: 10px;
+  resize: vertical;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.admin-usuario textarea:focus {
+  outline: none;
+  border-color: #20b2aa;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.12);
+}
+
+.admin-usuario hr {
+  border: none;
+  border-top: 1px solid #dceeed;
+  margin: 20px 0;
+}
+
+.admin-usuario button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

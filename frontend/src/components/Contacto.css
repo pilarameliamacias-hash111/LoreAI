@@ -202,3 +202,97 @@
     grid-template-columns: 1fr;
   }
 }
+
+.seccion-contacto,
+.seccion-contacto * {
+  box-sizing: border-box;
+}
+
+/* AJUSTES DEL FORMULARIO */
+
+.formulario-contacto {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.formulario-contacto input,
+.formulario-contacto select,
+.formulario-contacto textarea {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.formulario-contacto input:disabled {
+  background: #edf7f6;
+  color: #789194;
+  cursor: not-allowed;
+}
+
+.formulario-contacto button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.formulario-contacto button:focus-visible,
+.formulario-contacto input:focus-visible,
+.formulario-contacto select:focus-visible,
+.formulario-contacto textarea:focus-visible {
+  outline: 2px solid #168f89;
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .formulario-contacto {
+    padding: 22px 18px;
+  }
+
+  .correo-contacto {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
+
+/* DATOS DE USUARIOS REGISTRADOS */
+
+.datos-contacto {
+  padding: 16px;
+  background: #eaf9f8;
+  border: 1px solid #c8e7e6;
+  border-radius: 12px;
+}
+
+.datos-contacto p {
+  margin: 7px 0;
+  color: #354f53;
+}
+
+.datos-contacto small {
+  display: block;
+  margin-top: 10px;
+  color: #648181;
+  line-height: 1.5;
+}
+
+/* MENSAJES DE ESTADO */
+
+.error-contacto,
+.exito-contacto {
+  padding: 13px;
+  border-radius: 10px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.error-contacto {
+  color: #a83242;
+  background: #fff0f1;
+  border: 1px solid #f3c6cc;
+}
+
+.exito-contacto {
+  color: #168f89;
+  background: #e9fafa;
+  border: 1px solid #bce8e4;
+}

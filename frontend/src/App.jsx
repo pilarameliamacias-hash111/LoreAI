@@ -588,7 +588,7 @@ setHistoriaEnEdicionId(null)
 </section>
 
 {/* FORMULARIO DE CONTACTO */}
-<Contacto />
+<Contacto usuario={usuarioActual} />
 
 <footer className="pie-loreai">
   2026 LoreAI · Encontramos la estrella y la ayudamos a brillar.

@@ -18,6 +18,104 @@ const [mensajes, setMensajes] = useState([])
 const [cargandoMensajes, setCargandoMensajes] = useState(true)
 const [errorMensajes, setErrorMensajes] = useState('')
 const [mostrarMensajes, setMostrarMensajes] = useState(false)
+const [respuestas, setRespuestas] = useState({})
+const [enviandoRespuesta, setEnviandoRespuesta] = useState(false)
+const [bandejaActiva, setBandejaActiva] = useState('entrada')
+
+async function responderMensaje(id) {
+  const texto = respuestas[id]?.trim()
+
+  if (!texto) {
+    return
+  }
+
+  setEnviandoRespuesta(true)
+
+  try {
+    const respuesta = await fetch(
+      `http://localhost:3000/api/admin/mensajes/${id}/responder`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ respuesta: texto })
+      }
+    )
+
+    const datos = await respuesta.json()
+
+    if (!respuesta.ok) {
+      throw new Error(datos.mensaje || 'No se pudo enviar la respuesta.')
+    }
+
+    setMensajes(mensajesActuales =>
+      mensajesActuales.map(mensaje =>
+        mensaje.id === id
+          ? {
+              ...mensaje,
+              respuestas: [
+                ...(mensaje.respuestas || []),
+                datos.respuesta
+              ]
+            }
+          : mensaje
+      )
+    )
+
+    setRespuestas(actuales => ({
+      ...actuales,
+      [id]: ''
+    }))
+
+  } catch (error) {
+    alert(error.message)
+  } finally {
+    setEnviandoRespuesta(false)
+  }
+}
+
+async function actualizarMensaje(id, cambios) {
+  try {
+    const respuesta = await fetch(
+      `http://localhost:3000/api/admin/mensajes/${id}/estado`,
+      {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cambios)
+      }
+    )
+
+    const datos = await respuesta.json()
+
+    if (!respuesta.ok) {
+      throw new Error(
+        datos.mensaje || 'No se pudo actualizar el mensaje.'
+      )
+    }
+
+    setMensajes(actuales =>
+      actuales.map(mensaje =>
+        mensaje.id === id
+          ? { ...mensaje, ...datos.mensajeActualizado }
+          : mensaje
+      )
+    )
+
+  } catch (error) {
+    alert(error.message)
+  }
+}
+
+const mensajesFiltrados = mensajes.filter(mensaje =>
+  bandejaActiva === 'archivados'
+    ? mensaje.archivado === true
+    : mensaje.archivado !== true
+)
 
 const usuariosFiltrados = usuarios.filter(cuenta => {
   const busqueda = busquedaUsuario.toLowerCase()
@@ -240,17 +338,37 @@ setMensajes(datosMensajes)
 
 {mostrarMensajes && (
   <section className="admin-usuarios">
-    <h2>✉️ Mensajes recibidos</h2>
+    <h2>✉️ Centro de mensajes</h2>
+
+<div className="admin-bandejas">
+  <button
+    onClick={() => setBandejaActiva('entrada')}
+    className={bandejaActiva === 'entrada' ? 'activo' : ''}
+  >
+    📥 Bandeja de entrada
+  </button>
+
+  <button
+    onClick={() => setBandejaActiva('archivados')}
+    className={bandejaActiva === 'archivados' ? 'activo' : ''}
+  >
+    🗄️ Archivados
+  </button>
+</div>
 
     {cargandoMensajes ? (
       <p>Cargando mensajes...</p>
     ) : errorMensajes ? (
       <p>{errorMensajes}</p>
-    ) : mensajes.length === 0 ? (
-      <p>Todavía no has recibido mensajes.</p>
-    ) : (
-      <div className="admin-lista-usuarios">
-        {mensajes.map(mensaje => (
+    ) : mensajesFiltrados.length === 0 ? (
+  <p>
+    {bandejaActiva === 'archivados'
+      ? 'No hay mensajes archivados.'
+      : 'No tienes mensajes nuevos en la bandeja de entrada.'}
+  </p>
+) : (
+  <div className="admin-lista-usuarios">
+    {mensajesFiltrados.map(mensaje => (
           <article key={mensaje.id} className="admin-usuario">
             <h3>{mensaje.motivo}</h3>
 
@@ -272,6 +390,71 @@ setMensajes(datosMensajes)
             </p>
 
             <p>{mensaje.mensaje}</p>
+
+<div className="admin-acciones-mensaje">
+  <p>
+    <strong>Estado:</strong>{' '}
+    {mensaje.estado === 'atendido' ? '✅ Atendido' : '🕒 Pendiente'}
+  </p>
+
+  <button
+    onClick={() =>
+      actualizarMensaje(mensaje.id, {
+        estado: mensaje.estado === 'atendido' ? 'pendiente' : 'atendido'
+      })
+    }
+  >
+    {mensaje.estado === 'atendido'
+      ? 'Marcar como pendiente'
+      : 'Marcar como atendido'}
+  </button>
+
+  <button
+    onClick={() =>
+      actualizarMensaje(mensaje.id, {
+        archivado: !mensaje.archivado
+      })
+    }
+  >
+    {mensaje.archivado ? 'Recuperar mensaje' : 'Archivar mensaje'}
+  </button>
+</div>
+
+<hr />
+
+<h4>💬 Respuestas de LoreAI</h4>
+
+{mensaje.respuestas?.length > 0 ? (
+  mensaje.respuestas.map(respuesta => (
+    <div key={respuesta.id}>
+      <p>{respuesta.respuesta}</p>
+      <small>
+        {new Date(respuesta.fecha).toLocaleString()}
+      </small>
+    </div>
+  ))
+) : (
+  <p>Todavía no hay respuestas.</p>
+)}
+
+<textarea
+  placeholder="Escribe tu respuesta..."
+  value={respuestas[mensaje.id] || ''}
+  onChange={e =>
+    setRespuestas(actuales => ({
+      ...actuales,
+      [mensaje.id]: e.target.value
+    }))
+  }
+/>
+
+<button
+  onClick={() => responderMensaje(mensaje.id)}
+  disabled={enviandoRespuesta || !respuestas[mensaje.id]?.trim()}
+>
+  {enviandoRespuesta ? 'Enviando...' : 'Enviar respuesta'}
+</button>
+
           </article>
         ))}
       </div>

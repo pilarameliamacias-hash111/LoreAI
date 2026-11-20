@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import './Contacto.css'
 
-function Contacto() {
+function Contacto({ usuario }) {
   const [formulario, setFormulario] = useState({
     nombre: '',
     correo: '',
@@ -11,8 +11,8 @@ function Contacto() {
   })
 
   const [enviado, setEnviado] = useState(false)
-const [cargando, setCargando] = useState(false)
-const [error, setError] = useState('')
+  const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState('')
 
   function manejarCambio(e) {
     const { name, value } = e.target
@@ -26,181 +26,147 @@ const [error, setError] = useState('')
   }
 
   async function manejarEnvio(e) {
-  e.preventDefault()
+    e.preventDefault()
 
-  setCargando(true)
-  setEnviado(false)
-  setError('')
+    setCargando(true)
+    setEnviado(false)
+    setError('')
 
-  try {
-    const respuesta = await fetch('http://localhost:3000/api/contacto', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formulario)
-    })
+    try {
+      const respuesta = await fetch('http://localhost:3000/api/contacto', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formulario)
+      })
 
-    const datos = await respuesta.json()
+      const datos = await respuesta.json()
 
-    if (!respuesta.ok) {
-      throw new Error(datos.mensaje || 'No se pudo enviar el mensaje.')
+      if (!respuesta.ok) {
+        throw new Error(datos.mensaje || 'No se pudo enviar el mensaje.')
+      }
+
+      setEnviado(true)
+
+      setFormulario({
+        nombre: '',
+        correo: '',
+        motivo: 'Reporte',
+        mensaje: ''
+      })
+
+    } catch (error) {
+      setError(error.message || 'No se pudo conectar con el servidor.')
+    } finally {
+      setCargando(false)
     }
-
-    setEnviado(true)
-
-    setFormulario({
-      nombre: '',
-      correo: '',
-      motivo: 'Reporte',
-      mensaje: ''
-    })
-
-  } catch (error) {
-    setError(error.message || 'No se pudo conectar con el servidor.')
-  } finally {
-    setCargando(false)
   }
-}
 
   return (
     <section className="seccion-contacto" id="contacto">
       <div className="contenido-contacto">
 
-        <h2>¡Estamos para escucharte! ✨</h2>
+        <h2>Contáctanos ✉️</h2>
 
         <p className="texto-contacto">
-          ¿Encontraste algún problema, tienes una sugerencia
-          o quieres compartir algo con nosotros?
-          ¡Tu opinión ayuda a LoreAI a crecer!
+          ¿Tienes alguna duda, sugerencia o reporte?
+          ¡Te leemos! En LoreAI queremos escucharte.
         </p>
 
-        <form className="formulario-contacto" onSubmit={manejarEnvio}>
+        <form
+          className="formulario-contacto"
+          onSubmit={manejarEnvio}
+        >
 
-          <label htmlFor="nombre-contacto">Nombre</label>
-          <input
-            id="nombre-contacto"
-            type="text"
-            name="nombre"
-            placeholder="¿Cómo te llamas?"
-            value={formulario.nombre}
-            onChange={manejarCambio}
-            required
-          />
+          {usuario ? (
+            <div className="datos-contacto">
+              <p>
+                <strong>Nombre:</strong> {usuario.usuario}
+              </p>
 
-          <label htmlFor="correo-contacto">Correo electrónico</label>
-          <input
-            id="correo-contacto"
-            type="email"
-            name="correo"
-            placeholder="ejemplo@correo.com"
-            value={formulario.correo}
-            onChange={manejarCambio}
-            required
-          />
+              <p>
+                <strong>Correo:</strong> {usuario.correo}
+              </p>
 
-          <label htmlFor="motivo-contacto">Motivo del mensaje</label>
+              <small>
+                Usaremos los datos de tu cuenta para responderte.
+              </small>
+            </div>
+          ) : (
+            <>
+              <label htmlFor="nombre-contacto">Nombre</label>
+
+              <input
+                id="nombre-contacto"
+                type="text"
+                name="nombre"
+                placeholder="¿Cómo te llamas?"
+                value={formulario.nombre}
+                onChange={manejarCambio}
+                required
+              />
+
+              <label htmlFor="correo-contacto">
+                Correo electrónico
+              </label>
+
+              <input
+                id="correo-contacto"
+                type="email"
+                name="correo"
+                placeholder="ejemplo@correo.com"
+                value={formulario.correo}
+                onChange={manejarCambio}
+                required
+              />
+            </>
+          )}
+
+          <label htmlFor="motivo-contacto">Motivo</label>
+
           <select
             id="motivo-contacto"
             name="motivo"
             value={formulario.motivo}
             onChange={manejarCambio}
+            required
           >
-            <option value="Reporte">Reportar un problema</option>
-            <option value="Sugerencia">Enviar una sugerencia</option>
-            <option value="Consulta">Realizar una consulta</option>
-            <option value="Otro">Otro motivo</option>
+            <option value="Reporte">Reporte</option>
+            <option value="Consulta">Consulta</option>
+            <option value="Sugerencia">Sugerencia</option>
+            <option value="Otro">Otro</option>
           </select>
 
-          <label htmlFor="mensaje-contacto">Tu mensaje</label>
+          <label htmlFor="mensaje-contacto">Mensaje</label>
+
           <textarea
             id="mensaje-contacto"
             name="mensaje"
-            placeholder="Cuéntanos cómo podemos ayudarte..."
-            rows="5"
+            placeholder="Escribe tu mensaje aquí..."
             value={formulario.mensaje}
             onChange={manejarCambio}
             required
           />
 
-          <button type="submit" disabled={cargando}>
-  {cargando ? 'Enviando...' : 'Enviar mensaje ✨'}
-</button>
+          {error && (
+            <p className="error-contacto">{error}</p>
+          )}
 
           {enviado && (
-  <p className="confirmacion-contacto" role="status">
-    ¡Gracias por comunicarte con LoreAI! ✨
-    Tu mensaje ha sido recibido.
-  </p>
-)}
+            <p className="exito-contacto">
+              ¡Tu mensaje fue enviado correctamente! ⭐
+            </p>
+          )}
 
-{error && (
-  <p className="error-contacto" role="alert">
-    {error}
-  </p>
-)}
+          <button type="submit" disabled={cargando}>
+            {cargando ? 'Enviando...' : 'Enviar mensaje ✨'}
+          </button>
 
-        
         </form>
-
-        {/* REDES SOCIALES Y CORREO */}
-        <div className="redes-contacto">
-
-          <h3>También puedes encontrarnos en ✨</h3>
-
-          <div className="correo-contacto">
-            <span className="icono-contacto">✉</span>
-            <div>
-              <strong>Correo electrónico</strong>
-              <p>contacto@loreai.example</p>
-            </div>
-          </div>
-
-          <div className="lista-redes-contacto">
-
-            <div className="red-social">
-              <span>◎</span>
-              <div>
-                <strong>Instagram</strong>
-                <p>@loreai.oficial</p>
-              </div>
-            </div>
-
-            <div className="red-social">
-              <span>𝕏</span>
-              <div>
-                <strong>X</strong>
-                <p>@LoreAI</p>
-              </div>
-            </div>
-
-            <div className="red-social">
-              <span>♪</span>
-              <div>
-                <strong>TikTok</strong>
-                <p>@loreai.oficial</p>
-              </div>
-            </div>
-
-            <div className="red-social">
-              <span>f</span>
-              <div>
-                <strong>Facebook</strong>
-                <p>LoreAI Oficial</p>
-              </div>
-            </div>
-
-          </div>
-
-          <p className="aviso-redes">
-            *Correo y cuentas ilustrativas de demostración.
-          </p>
-
-        </div>
-
       </div>
     </section>
-
   )
 }
 
