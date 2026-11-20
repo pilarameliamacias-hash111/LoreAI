@@ -21,6 +21,7 @@ const [mostrarMensajes, setMostrarMensajes] = useState(false)
 const [respuestas, setRespuestas] = useState({})
 const [enviandoRespuesta, setEnviandoRespuesta] = useState(false)
 const [bandejaActiva, setBandejaActiva] = useState('entrada')
+const [carpetaActiva, setCarpetaActiva] = useState(null)
 
 async function responderMensaje(id) {
   const texto = respuestas[id]?.trim()
@@ -116,6 +117,26 @@ const mensajesFiltrados = mensajes.filter(mensaje =>
     ? mensaje.archivado === true
     : mensaje.archivado !== true
 )
+
+const mensajesAgrupados = mensajesFiltrados.reduce((grupos, mensaje) => {
+  const clave = mensaje.usuarioId
+    ? `usuario-${mensaje.usuarioId}`
+    : `visitante-${mensaje.correo?.toLowerCase().trim() || mensaje.nombre}`
+
+  if (!grupos[clave]) {
+    grupos[clave] = {
+      clave,
+      nombre: mensaje.nombre,
+      correo: mensaje.correo,
+      usuarioId: mensaje.usuarioId,
+      mensajes: []
+    }
+  }
+
+  grupos[clave].mensajes.push(mensaje)
+
+  return grupos
+}, {})
 
 const usuariosFiltrados = usuarios.filter(cuenta => {
   const busqueda = busquedaUsuario.toLowerCase()
@@ -368,95 +389,124 @@ setMensajes(datosMensajes)
   </p>
 ) : (
   <div className="admin-lista-usuarios">
-    {mensajesFiltrados.map(mensaje => (
+   
+{Object.values(mensajesAgrupados).map(grupo => (
+  <article key={grupo.clave} className="admin-carpeta">
+
+    <button
+      className="admin-carpeta-boton"
+      onClick={() =>
+        setCarpetaActiva(
+          carpetaActiva === grupo.clave ? null : grupo.clave
+        )
+      }
+    >
+      📁 {grupo.nombre} — {grupo.mensajes.length} mensaje(s)
+      {carpetaActiva === grupo.clave ? ' ▲' : ' ▼'}
+    </button>
+
+    {carpetaActiva === grupo.clave && (
+      <div className="admin-mensajes-carpeta">
+
+        {grupo.mensajes.map(mensaje => (
           <article key={mensaje.id} className="admin-usuario">
+
             <h3>{mensaje.motivo}</h3>
 
-            <p>
-              <strong>Nombre:</strong> {mensaje.nombre}
-            </p>
-
-            <p>
-              <strong>Correo:</strong> {mensaje.correo}
-            </p>
+            <p><strong>Nombre:</strong> {mensaje.nombre}</p>
+            <p><strong>Correo:</strong> {mensaje.correo}</p>
 
             <p>
               <strong>Fecha:</strong>{' '}
               {new Date(mensaje.fecha).toLocaleString()}
             </p>
 
-            <p>
-              <strong>Mensaje:</strong>
-            </p>
-
+            <p><strong>Mensaje:</strong></p>
             <p>{mensaje.mensaje}</p>
 
-<div className="admin-acciones-mensaje">
-  <p>
-    <strong>Estado:</strong>{' '}
-    {mensaje.estado === 'atendido' ? '✅ Atendido' : '🕒 Pendiente'}
-  </p>
+            <div className="admin-acciones-mensaje">
+              <p>
+                <strong>Estado:</strong>{' '}
+                {mensaje.estado === 'atendido'
+                  ? '✅ Atendido'
+                  : '🕒 Pendiente'}
+              </p>
 
-  <button
-    onClick={() =>
-      actualizarMensaje(mensaje.id, {
-        estado: mensaje.estado === 'atendido' ? 'pendiente' : 'atendido'
-      })
-    }
-  >
-    {mensaje.estado === 'atendido'
-      ? 'Marcar como pendiente'
-      : 'Marcar como atendido'}
-  </button>
+              <button
+                onClick={() =>
+                  actualizarMensaje(mensaje.id, {
+                    estado: mensaje.estado === 'atendido'
+                      ? 'pendiente'
+                      : 'atendido'
+                  })
+                }
+              >
+                {mensaje.estado === 'atendido'
+                  ? 'Marcar como pendiente'
+                  : 'Marcar como atendido'}
+              </button>
 
-  <button
-    onClick={() =>
-      actualizarMensaje(mensaje.id, {
-        archivado: !mensaje.archivado
-      })
-    }
-  >
-    {mensaje.archivado ? 'Recuperar mensaje' : 'Archivar mensaje'}
-  </button>
-</div>
+              <button
+                onClick={() =>
+                  actualizarMensaje(mensaje.id, {
+                    archivado: !mensaje.archivado
+                  })
+                }
+              >
+                {mensaje.archivado
+                  ? 'Recuperar mensaje'
+                  : 'Archivar mensaje'}
+              </button>
+            </div>
 
-<hr />
+            <hr />
 
-<h4>💬 Respuestas de LoreAI</h4>
+            <h4>💬 Respuestas de LoreAI</h4>
 
-{mensaje.respuestas?.length > 0 ? (
-  mensaje.respuestas.map(respuesta => (
-    <div key={respuesta.id}>
-      <p>{respuesta.respuesta}</p>
-      <small>
-        {new Date(respuesta.fecha).toLocaleString()}
-      </small>
-    </div>
-  ))
-) : (
-  <p>Todavía no hay respuestas.</p>
-)}
+            {mensaje.respuestas?.length > 0 ? (
+              mensaje.respuestas.map(respuesta => (
+                <div key={respuesta.id}>
+                  <p>{respuesta.respuesta}</p>
+                  <small>
+                    {new Date(respuesta.fecha).toLocaleString()}
+                  </small>
+                </div>
+              ))
+            ) : (
+              <p>Todavía no hay respuestas.</p>
+            )}
 
-<textarea
-  placeholder="Escribe tu respuesta..."
-  value={respuestas[mensaje.id] || ''}
-  onChange={e =>
-    setRespuestas(actuales => ({
-      ...actuales,
-      [mensaje.id]: e.target.value
-    }))
-  }
-/>
+            <textarea
+              placeholder="Escribe tu respuesta..."
+              value={respuestas[mensaje.id] || ''}
+              onChange={e =>
+                setRespuestas(actuales => ({
+                  ...actuales,
+                  [mensaje.id]: e.target.value
+                }))
+              }
+            />
 
-<button
-  onClick={() => responderMensaje(mensaje.id)}
-  disabled={enviandoRespuesta || !respuestas[mensaje.id]?.trim()}
->
-  {enviandoRespuesta ? 'Enviando...' : 'Enviar respuesta'}
-</button>
+            <button
+              onClick={() => responderMensaje(mensaje.id)}
+              disabled={
+                enviandoRespuesta || !respuestas[mensaje.id]?.trim()
+              }
+            >
+              {enviandoRespuesta
+                ? 'Enviando...'
+                : 'Enviar respuesta'}
+            </button>
 
           </article>
         ))}
+
+      </div>
+    )}
+
+  </article>
+))}
+
       </div>
     )}
   </section>
