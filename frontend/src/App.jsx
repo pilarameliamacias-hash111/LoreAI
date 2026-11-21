@@ -237,8 +237,11 @@ console.log('Estado de notificaciones:', notificacionesSinLeer)
           }}
           onError={() => setErrorVideo(true)}
         >
-          <source src="/videos/Bienvenido.mp4" type="video/mp4" />
-          Tu navegador no puede reproducir este vídeo.
+          <source
+    src={`${import.meta.env.BASE_URL}videos/Bienvenido.mp4`}
+    type="video/mp4"
+  />
+
         </video>
 
         <button
@@ -417,7 +420,7 @@ setHistoriaEnEdicionId(null)
             onClick={() => setMenuAbierto(false)}
           >
             <img
-              src="/Logo-LoreAI.png"
+              src={`${import.meta.env.BASE_URL}Logo-LoreAI.png`}
               alt="LoreAI"
             />
           </a>
@@ -538,11 +541,7 @@ setHistoriaEnEdicionId(null)
           </div>
 
           <div className="portada-mascota">
-            <img
-              src="/La-Lore-chan.png"
-              className="lore-chan"
-              alt="Lore-Chan"
-            />
+            <img src={`${import.meta.env.BASE_URL}La-Lore-chan.png`} />
           </div>
 
         </div>
@@ -719,9 +718,7 @@ setHistoriaEnEdicionId(null)
 
 <article className="tarjeta-oferta tarjeta-monetizacion">
   <img
-    src="/Historia%20pagada.png"
-    alt="Libro, pluma y monedas"
-    className="imagen-monetizacion"
+    src={`${import.meta.env.BASE_URL}Historia%20pagada.png`}
   />
 
   <div className="contenido-monetizacion">
@@ -738,8 +735,7 @@ setHistoriaEnEdicionId(null)
 </article>
 
 <article className="tarjeta-oferta tarjeta-monetizacion">
-  <img
-    src="/Historia%20con%20anuncios.png"
+ <img src={`${import.meta.env.BASE_URL}Historia%20con%20anuncios.png`}
     alt="Pantalla de anuncios y monedas"
     className="imagen-monetizacion"
   />

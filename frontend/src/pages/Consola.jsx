@@ -491,7 +491,10 @@ async function eliminarCapituloDefinitivamente() {
     <main className="pagina-consola">
       <header className="encabezado-consola">
         <a href="#" className="logo-consola" onClick={alVolver}>
-          <img src="/Logo-LoreAI.png" alt="LoreAI" />
+          <img
+  src={`${import.meta.env.BASE_URL}Logo-LoreAI.png`}
+  alt="LoreAI"
+/>
         </a>
 
         <div className="acciones-encabezado-consola">

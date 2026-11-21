@@ -80,7 +80,7 @@ body {
     );
   overflow: hidden;
   
-    background-image: url("/public/fondo-estrellado.png");
+    background-image: url("/fondo-estrellado.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

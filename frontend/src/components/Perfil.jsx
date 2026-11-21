@@ -323,7 +323,7 @@ setPortadaPerfil(usuario.portadaPerfil || '')
 
       <header className="encabezado-perfil">
         <button className="logo-perfil" onClick={alVolver}>
-          <img src="/Logo-LoreAI.png" alt="LoreAI" />
+          <img src={`${import.meta.env.BASE_URL}Logo-LoreAI.png`} alt="LoreAI" />
         </button>
 
         <nav className="navegacion-perfil">

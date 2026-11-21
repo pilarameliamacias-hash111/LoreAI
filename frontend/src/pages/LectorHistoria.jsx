@@ -62,7 +62,10 @@ function LectorHistoria({ historiaId, alVolver, alVerAutor }) {
           ← VOLVER
         </button>
 
-        <img src="/Logo-LoreAI.png" alt="LoreAI" />
+        <img
+  src={`${import.meta.env.BASE_URL}Logo-LoreAI.png`}
+  alt="LoreAI"
+/>
       </header>
 
       <section className="contenido-lector">

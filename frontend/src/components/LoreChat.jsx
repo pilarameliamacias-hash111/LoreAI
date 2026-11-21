@@ -459,7 +459,7 @@ function reiniciarChat() {
         
 <div className="lore-avatar">
   <img
-    src="/Lore-chan-perfil.png"
+     src={`${import.meta.env.BASE_URL}Lore-chan-perfil.png`}
     alt="Perfil de Lore-Chan"
   />
 </div>
