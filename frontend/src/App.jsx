@@ -718,8 +718,10 @@ setHistoriaEnEdicionId(null)
 
 <article className="tarjeta-oferta tarjeta-monetizacion">
   <img
-    src={`${import.meta.env.BASE_URL}Historia%20pagada.png`}
-  />
+  className="imagen-monetizacion"
+  src={`${import.meta.env.BASE_URL}Historia%20pagada.png`}
+  alt="Historia pagada"
+/>
 
   <div className="contenido-monetizacion">
     <span className="etiqueta-oferta">Historias pagadas ✍️</span>

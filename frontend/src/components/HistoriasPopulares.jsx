@@ -5,7 +5,7 @@ import './HistoriasPopulares.css'
 const historias = [
   {
     titulo: 'El estanque de los patos',
-    portada: '/El estanque de los patos.png',
+    portada: 'El estanque de los patos.png',
     descripcion: 'Una bailarina esclava visita todos los días el estanque de patos del palacio del faraón para encontrarse con un hombre del que se ha enamorado, sin saber que se trata del propio faraón.',
     principal: 'Romance',
     secundario: 'Drama',
@@ -14,7 +14,7 @@ const historias = [
   },
   {
     titulo: 'Las Aventuras de Ping-Giu',
-    portada: '/Las Aventuras de Ping-Giu_ Círculos de Magia.png',
+    portada: 'Las Aventuras de Ping-Giu_ Círculos de Magia.png',
     descripcion: 'En un mundo moderno donde la magia ha dejado de ser necesaria, Giu Ima es una de las pocas sobrevivientes de un clan de magos exterminado hace diez años. Bajo la identidad masculina de Ping-Giu, cuida de su hermanita Gameyo, hasta que el antiguo heredero del clan aparece para reclutarla en una lucha por recuperar su hogar.',
     principal: 'Aventura',
     secundario: 'Ciencia ficción',
@@ -23,7 +23,7 @@ const historias = [
   },
   {
     titulo: 'Cabaña Emma',
-    portada: '/Cabaña Emma.jpg',
+    portada: 'Cabaña Emma.jpg',
     descripcion: 'Una institución entrena a jóvenes con habilidades especiales para convertirse en exorcistas e investigadores paranormales. En un mundo que ya aceptó la existencia del mal, surge una pregunta: si ellos protegen a la gente normal, ¿quién los protege a ellos?',
     principal: 'Terror',
     secundario: 'Ciencia ficción',
@@ -32,7 +32,7 @@ const historias = [
   },
   {
     titulo: 'Cartas desde el Purgatorio',
-    portada: '/Cartas del Purgatorio.jpg',
+    portada: 'Cartas del Purgatorio.jpg',
     descripcion: 'Una joven comparte su experiencia al descubrir que vive con depresión y el camino que recorrió para aprender a comprenderse, buscar apoyo y recuperar su bienestar.',
     principal: 'Slice of Life',
     categoria: 'Basado en hechos reales',
@@ -40,7 +40,7 @@ const historias = [
   },
   {
     titulo: 'Vidrios',
-    portada: '/Vidrios.jpg',
+    portada: 'Vidrios.jpg',
     descripcion: 'Un joven encuentra a una chica herida, descalza y con la mirada perdida. Ella parece no poder hablar. Cuando decide ayudarla y llevarla al hospital, su vida cambia de una manera que jamás habría imaginado.',
     principal: 'Suspenso',
     secundario: 'Misterio',
@@ -49,7 +49,7 @@ const historias = [
   },
   {
     titulo: 'Lady Rallye',
-    portada: '/Lady Rallye.jpg',
+    portada: 'Lady Rallye.jpg',
     descripcion: 'El duque Maximillian ha sido asesinado y la única sospechosa es su esposa, la duquesa Lady Rallye. Aunque todos parecen conocer su culpabilidad, sus damas nobles y su séquito están dispuestos a defenderla.',
     principal: 'Misterio',
     secundario: 'Drama',
@@ -58,7 +58,7 @@ const historias = [
   },
   {
     titulo: 'Cómo podar el árbol familiar',
-    portada: '/Cómo podar el árbol familiar.jpg',
+    portada: 'Cómo podar el árbol familiar.jpg',
     descripcion: 'Una guía para aprender a establecer límites, reconocer cuándo otras personas no los respetan y tomar distancia de relaciones que pueden hacernos daño, incluso cuando no existe una intención consciente de lastimar.',
     principal: 'Slice of Life',
     categoria: 'Guía o Instructivo',
@@ -66,7 +66,7 @@ const historias = [
   },
   {
     titulo: 'El arte de autoproducirse',
-    portada: '/El arte de autoproducirse.png',
+    portada: 'El arte de autoproducirse.png',
     descripcion: 'Una guía para abrirse camino como influencer, aprender a gestionar la propia imagen y evitar los tropiezos que pueden convertir una aventura en internet en una auténtica pesadilla.',
     principal: 'Slice of Life',
     categoria: 'Guía o Instructivo',
@@ -74,7 +74,7 @@ const historias = [
   },
   {
     titulo: 'El amor se puede explicar con ciencia',
-    portada: '/El amor se puede explicar con ciencia.jpg',
+    portada: 'El amor se puede explicar con ciencia.jpg',
     descripcion: 'Un fanfic ambientado en el universo de Dr. Stone que explora el amor y las relaciones desde una perspectiva llena de ciencia, humor y situaciones inesperadas.',
     principal: 'Romance',
     secundario: 'Comedia',
@@ -83,7 +83,7 @@ const historias = [
   },
   {
     titulo: 'Luna Escarlata',
-    portada: '/Luna Escarlata.jpg',
+    portada: 'Luna Escarlata.jpg',
     descripcion: 'En un mundo donde humanos, monstruos, híbridos y bestias pensantes conviven, los vampiros llevan siglos extintos. Pero el heredero de una familia de cazadores resucita a la condesa Vanellia Van Lightnithing, quien recuerda una historia muy distinta sobre la desaparición de su pueblo.',
     principal: 'Ciencia ficción',
     secundario: 'Romance',
@@ -92,7 +92,7 @@ const historias = [
   },
   {
     titulo: 'Copas',
-    portada: '/Copas.jpg',
+    portada: 'Copas.jpg',
     descripcion: 'Detrás de la barra de un establecimiento, un bartender escucha y recopila las historias de sus clientes anónimos. Cada copa puede traer consigo una vida, un recuerdo o una confesión inesperada.',
     principal: 'Slice of Life',
     categoria: 'Basado en hechos reales',
@@ -100,7 +100,7 @@ const historias = [
   },
   {
     titulo: 'Conejitos',
-    portada: '/Conejitos.jpg',
+    portada: 'Conejitos.jpg',
     descripcion: 'Uxi, una estudiante de preparatoria, se enamora de su profesor de lengua y literatura. Lo que comienza con una confesión inesperada se convierte en una relación secreta marcada por una desigualdad de poder y señales que invitan a cuestionar sus verdaderas intenciones.',
     principal: 'Romance',
     secundario: 'Suspenso',
@@ -109,7 +109,7 @@ const historias = [
   },
   {
     titulo: 'Sin verte para quererte',
-    portada: '/Sin verte para quererte.jpg',
+    portada: 'Sin verte para quererte.jpg',
     descripcion: 'Kitoa, un estudiante de secundaria con prosopagnosia, tiene dificultades para reconocer rostros. Tras varios desencuentros con Ana, una joven conocida por su carácter agresivo, descubre que puede reconocer su rostro. Un encuentro en el consultorio del neurólogo será el comienzo de una conexión inesperada.',
     principal: 'Romance',
     secundario: 'Slice of Life',
@@ -118,7 +118,7 @@ const historias = [
   },
   {
     titulo: 'Mil anécdotas random',
-    portada: '/Mil anécdotas random.jpg',
+    portada: 'Mil anécdotas random.jpg',
     descripcion: 'Una recopilación de anécdotas raras, increíbles y divertidas compartidas por distintos colaboradores. Porque la realidad también sabe escribir las historias más inesperadas.',
     principal: 'Slice of Life',
     secundario: 'Comedia',
@@ -127,7 +127,7 @@ const historias = [
   },
   {
     titulo: 'Te Amo',
-    portada: '/Te amo.jpg',
+    portada: 'Te amo.jpg',
     descripcion: 'Una colección de poemas para expresar el amor en todas sus formas: sus distintas emociones, sus matices y las maneras únicas en que cada persona puede experimentarlo.',
     principal: 'Slice of Life',
     secundario: 'Romance',
@@ -182,7 +182,7 @@ function HistoriasPopulares() {
                 <article className="tarjeta-popular" key={historia.titulo}>
                   <img
                     className="portada-popular"
-                    src={historia.portada}
+                    src={`${import.meta.env.BASE_URL}${encodeURIComponent(historia.portada).replace(/%2F/g, '/')}`}
                     alt={`Portada de ${historia.titulo}`}
                     loading="lazy"
                   />
