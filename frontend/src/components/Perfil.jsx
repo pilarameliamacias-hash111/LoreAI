@@ -25,6 +25,7 @@ function Perfil({
   usuario,
   notificacionesSinLeer,
   alLeerNotificaciones,
+  alActualizarNotificaciones,
   alVolver,
   alActualizarUsuario,
   alCerrarSesion,
@@ -474,31 +475,110 @@ setPortadaPerfil(usuario.portadaPerfil || '')
   <h3>{notificacion.titulo}</h3>
 
   {notificacion.conversacion ? (
-    <>
-      <div className="mensaje-original">
-        <h4>Tu mensaje</h4>
-        <p>{notificacion.conversacion.mensaje}</p>
-        <small>
-          {new Date(notificacion.conversacion.fechaMensaje).toLocaleString()}
-        </small>
-      </div>
+  <>
+    <div className="mensaje-original">
+      <h4>Tu mensaje</h4>
+      <p>{notificacion.conversacion.mensaje}</p>
+      <small>
+        {new Date(notificacion.conversacion.fechaMensaje).toLocaleString()}
+      </small>
+    </div>
 
-      <div className="respuestas-notificacion">
-        <h4>Respuesta del equipo LoreAI</h4>
+    <div className="respuestas-notificacion">
+      <h4>Conversación con el equipo LoreAI</h4>
 
-        {notificacion.conversacion.respuestas.map(respuesta => (
-          <div key={respuesta.id} className="respuesta-notificacion">
-            <p>{respuesta.respuesta}</p>
-            <small>
-              {new Date(respuesta.fecha).toLocaleString()}
-            </small>
-          </div>
-        ))}
-      </div>
-    </>
-  ) : (
-    <p>{notificacion.contenido}</p>
-  )}
+      {notificacion.conversacion.respuestas.map(respuesta => (
+        <div
+          key={respuesta.id}
+          className={
+            respuesta.remitente === 'usuario'
+              ? 'respuesta-notificacion respuesta-usuario'
+              : 'respuesta-notificacion respuesta-equipo'
+          }
+        >
+          <strong>
+            {respuesta.remitente === 'usuario'
+              ? 'Tú'
+              : 'Equipo LoreAI'}
+          </strong>
+
+          <p>{respuesta.respuesta}</p>
+
+          <small>
+            {new Date(respuesta.fecha).toLocaleString()}
+          </small>
+        </div>
+      ))}
+    </div>
+
+    <form
+      className="formulario-respuesta-notificacion"
+      onSubmit={async (e) => {
+        e.preventDefault()
+
+        const campo = e.currentTarget.elements.respuesta
+        const texto = campo.value.trim()
+
+        if (!texto) return
+
+        try {
+          const resultado = await fetch(
+            `http://localhost:3000/api/mensajes/${notificacion.conversacion.id}/responder`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify({ respuesta: texto })
+            }
+          )
+
+          const datos = await resultado.json()
+
+          if (!resultado.ok) {
+            throw new Error(datos.mensaje || 'No se pudo enviar la respuesta.')
+          }
+
+          campo.value = ''
+
+          // Actualizar la conversación sin recargar la página
+          const actualizadas = await fetch(
+            'http://localhost:3000/api/notificaciones',
+            {
+              credentials: 'include',
+              cache: 'no-store'
+            }
+          )
+
+          if (actualizadas.ok) {
+            const nuevasNotificaciones = await actualizadas.json()
+            alActualizarNotificaciones(nuevasNotificaciones)
+          }
+
+          alert('¡Tu respuesta se envió correctamente!')
+
+        } catch (error) {
+          console.error('Error al enviar respuesta:', error)
+          alert(error.message)
+        }
+      }}
+    >
+      <textarea
+        name="respuesta"
+        placeholder="Escribe tu respuesta..."
+        rows="3"
+        required
+      />
+
+      <button type="submit">
+        Enviar respuesta
+      </button>
+    </form>
+  </>
+) : (
+  <p>{notificacion.contenido}</p>
+)}
 </article>
           ))
         ) : (

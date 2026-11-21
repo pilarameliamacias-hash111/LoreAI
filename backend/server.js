@@ -54,6 +54,7 @@ const archivoMensajes = path.join(
     __dirname,
     "mensajes.json"
 );
+const archivoNotificaciones = path.join(__dirname, "notificaciones.json");
 function cargarUsuarios() {
     try {
         const contenido = fs.readFileSync(archivoUsuarios, "utf8");
@@ -111,6 +112,29 @@ function guardarMensajes(mensajes) {
     fs.writeFileSync(
         archivoMensajes,
         JSON.stringify(mensajes, null, 2),
+        "utf8"
+    );
+}
+
+function cargarNotificaciones() {
+    try {
+        if (!fs.existsSync(archivoNotificaciones)) {
+            fs.writeFileSync(archivoNotificaciones, "[]", "utf8");
+        }
+
+        return JSON.parse(
+            fs.readFileSync(archivoNotificaciones, "utf8")
+        );
+    } catch (error) {
+        console.error("Error al leer notificaciones:", error);
+        return [];
+    }
+}
+
+function guardarNotificaciones(notificaciones) {
+    fs.writeFileSync(
+        archivoNotificaciones,
+        JSON.stringify(notificaciones, null, 2),
         "utf8"
     );
 }
@@ -247,45 +271,248 @@ app.get("/api/admin/mensajes", verificarAdmin, (req, res) => {
     }
 });
 
-// ACTUALIZAR ESTADO Y ARCHIVO DE UN MENSAJE
-app.patch("/api/admin/mensajes/:id/estado", verificarAdmin, (req, res) => {
+app.post("/api/admin/mensajes/:id/responder", verificarAdmin, (req, res) => {
     try {
         const { id } = req.params;
-        const { estado, archivado } = req.body;
+        const { respuesta } = req.body;
+
+        if (!respuesta || !respuesta.trim()) {
+            return res.status(400).json({
+                mensaje: "La respuesta no puede estar vacía."
+            });
+        }
 
         const mensajes = cargarMensajes();
         const mensaje = mensajes.find(m => m.id === id);
 
         if (!mensaje) {
             return res.status(404).json({
-                mensaje: "No encontramos ese mensaje."
+                mensaje: "No se encontró el mensaje."
             });
         }
 
-        if (
-            estado !== undefined &&
-            !["pendiente", "atendido"].includes(estado)
-        ) {
-            return res.status(400).json({
-                mensaje: "El estado indicado no es válido."
+        const nuevaRespuesta = {
+    id: crypto.randomUUID(),
+    respuesta: respuesta.trim(),
+    fecha: new Date().toISOString(),
+    remitente: "admin"
+};
+
+
+        mensaje.respuestas = mensaje.respuestas || [];
+        mensaje.respuestas.push(nuevaRespuesta);
+
+        guardarMensajes(mensajes);
+
+        // Crear una notificación si el remitente tiene una cuenta
+        if (mensaje.usuarioId) {
+            const notificaciones = cargarNotificaciones();
+
+            notificaciones.push({
+                id: crypto.randomUUID(),
+                usuarioId: mensaje.usuarioId,
+                mensajeId: mensaje.id,
+                titulo: "Nueva respuesta de LoreAI",
+                contenido: "El equipo de LoreAI ha respondido a tu mensaje.",
+                fecha: new Date().toISOString(),
+                leida: false
+            });
+
+            guardarNotificaciones(notificaciones);
+        }
+
+        return res.json({
+            mensaje: "La respuesta se envió correctamente.",
+            respuesta: nuevaRespuesta
+        });
+
+    } catch (error) {
+        console.error("Error al responder mensaje:", error);
+
+        return res.status(500).json({
+            mensaje: "Ocurrió un error al enviar la respuesta."
+        });
+    }
+});
+
+// Permitir que un usuario responda a un mensaje de contacto
+app.post("/api/mensajes/:id/responder", (req, res) => {
+    try {
+        const { id } = req.params;
+        const { respuesta } = req.body;
+
+        // Verificar que haya una sesión iniciada
+        if (!req.session.usuarioId) {
+            return res.status(401).json({
+                mensaje: "Debes iniciar sesión para responder."
             });
         }
 
-        if (
-            archivado !== undefined &&
-            typeof archivado !== "boolean"
-        ) {
+        // Validar que la respuesta no esté vacía
+        if (!respuesta || !respuesta.trim()) {
             return res.status(400).json({
-                mensaje: "El valor de archivo no es válido."
+                mensaje: "La respuesta no puede estar vacía."
+            });
+        }
+
+        const mensajes = cargarMensajes();
+
+        // Buscar el mensaje y comprobar que pertenezca al usuario
+        const mensaje = mensajes.find(m =>
+            m.id === id &&
+            m.usuarioId === req.session.usuarioId
+        );
+
+        if (!mensaje) {
+            return res.status(404).json({
+                mensaje: "No se encontró el mensaje."
+            });
+        }
+
+        // Crear la respuesta del usuario
+const nuevaRespuesta = {
+    id: crypto.randomUUID(),
+    respuesta: respuesta.trim(),
+    fecha: new Date().toISOString(),
+    remitente: "usuario",
+    leidaPorAdmin: false
+};
+
+        mensaje.respuestas = mensaje.respuestas || [];
+        mensaje.respuestas.push(nuevaRespuesta);
+
+        guardarMensajes(mensajes);
+
+        return res.json({
+            mensaje: "Tu respuesta se envió correctamente.",
+            respuesta: nuevaRespuesta
+        });
+
+    } catch (error) {
+        console.error("Error al responder mensaje:", error);
+
+        return res.status(500).json({
+            mensaje: "Ocurrió un error al enviar tu respuesta."
+        });
+    }
+});
+
+app.get("/api/notificaciones", (req, res) => {
+    try {
+        if (!req.session.usuarioId) {
+            return res.status(401).json({
+                mensaje: "Debes iniciar sesión para consultar tus notificaciones."
+            });
+        }
+
+        const notificaciones = cargarNotificaciones();
+        const mensajes = cargarMensajes();
+
+        const notificacionesUsuario = notificaciones
+            .filter(notificacion =>
+                notificacion.usuarioId === req.session.usuarioId
+            )
+            .map(notificacion => {
+                const mensaje = mensajes.find(m =>
+                    m.id === notificacion.mensajeId &&
+                    m.usuarioId === req.session.usuarioId
+                );
+
+                return {
+                    ...notificacion,
+                    conversacion: mensaje ? {
+    id: mensaje.id,
+    mensaje: mensaje.mensaje,
+    motivo: mensaje.motivo,
+    fechaMensaje: mensaje.fecha,
+    respuestas: mensaje.respuestas || []
+} : null
+                };
+            });
+
+        return res.json(notificacionesUsuario);
+
+    } catch (error) {
+        console.error("Error al consultar notificaciones:", error);
+
+        return res.status(500).json({
+            mensaje: "No se pudieron consultar las notificaciones."
+        });
+    }
+});
+
+app.patch("/api/notificaciones/leer", (req, res) => {
+    try {
+        if (!req.session.usuarioId) {
+            return res.status(401).json({
+                mensaje: "Debes iniciar sesión."
+            });
+        }
+
+        const notificaciones = cargarNotificaciones();
+
+        const actualizadas = notificaciones.map(notificacion => {
+            if (notificacion.usuarioId === req.session.usuarioId) {
+                return {
+                    ...notificacion,
+                    leida: true
+                };
+            }
+
+            return notificacion;
+        });
+
+        guardarNotificaciones(actualizadas);
+
+        return res.json({
+            mensaje: "Notificaciones marcadas como leídas."
+        });
+
+    } catch (error) {
+        console.error("Error al marcar notificaciones:", error);
+
+        return res.status(500).json({
+            mensaje: "No se pudieron actualizar las notificaciones."
+        });
+    }
+});
+
+// ACTUALIZAR ESTADO Y ARCHIVO DE UN MENSAJE
+
+app.patch("/api/admin/mensajes/:id/estado", verificarAdmin, (req, res) => {
+    try {
+        const { id } = req.params;
+        const { estado, archivado, marcarRespuestasLeidas } = req.body;
+
+        const mensajes = cargarMensajes();
+        const mensaje = mensajes.find(m => m.id === id);
+
+        if (!mensaje) {
+            return res.status(404).json({
+                mensaje: "No se encontró el mensaje."
             });
         }
 
         if (estado !== undefined) {
+            if (!["pendiente", "atendido"].includes(estado)) {
+                return res.status(400).json({
+                    mensaje: "El estado no es válido."
+                });
+            }
+
             mensaje.estado = estado;
         }
 
         if (archivado !== undefined) {
-            mensaje.archivado = archivado;
+            mensaje.archivado = Boolean(archivado);
+        }
+
+        if (marcarRespuestasLeidas === true) {
+            mensaje.respuestas = (mensaje.respuestas || []).map(respuesta =>
+                respuesta.remitente === "usuario"
+                    ? { ...respuesta, leidaPorAdmin: true }
+                    : respuesta
+            );
         }
 
         guardarMensajes(mensajes);

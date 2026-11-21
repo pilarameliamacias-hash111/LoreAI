@@ -50,6 +50,9 @@ const [usuarioPerfilPublicoId, setUsuarioPerfilPublicoId] = useState(null)
 const [errorVideo, setErrorVideo] = useState(false)
 const [usuarioActual, setUsuarioActual] = useState(null)
 const [notificacionesSinLeer, setNotificacionesSinLeer] = useState([])
+function actualizarNotificaciones(datos) {
+  setNotificacionesSinLeer(datos)
+}
 const [comprobandoSesion, setComprobandoSesion] = useState(true)
 const [mostrarCrearCapitulo, setMostrarCrearCapitulo] = useState(false)
 const [capituloEnEdicionId, setCapituloEnEdicionId] = useState(null)
@@ -272,6 +275,7 @@ console.log('Estado de notificaciones:', notificacionesSinLeer)
     usuario={usuarioActual}
     notificacionesSinLeer={notificacionesSinLeer}
         alLeerNotificaciones={marcarNotificacionesComoLeidas}
+        alActualizarNotificaciones={actualizarNotificaciones}
     alVolver={() => {
   setMostrarPerfil(false)
 

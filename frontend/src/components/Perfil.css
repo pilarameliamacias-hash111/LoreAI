@@ -969,3 +969,111 @@
   vertical-align: middle;
   border: 2px solid #d5eeeb;
 }
+
+.indicador-notificacion-menu {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-left: 8px;
+  background-color: #ff3030;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.avatar-con-notificacion {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.indicador-notificacion {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  background-color: #ff3030;
+  border: 2px solid white;
+  border-radius: 50%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Página de notificaciones */
+
+.pagina-notificaciones {
+  width: 90%;
+  max-width: 1100px;
+  min-height: 450px;
+  margin: 40px auto;
+}
+
+.pagina-notificaciones h1 {
+  margin-bottom: 25px;
+}
+
+.categorias-notificaciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #d8e5e5;
+  padding-bottom: 15px;
+}
+
+.categorias-notificaciones button {
+  position: relative;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #edf5f5;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.categorias-notificaciones button:hover {
+  background: #d8eeee;
+}
+
+.categorias-notificaciones button.categoria-activa {
+  background: #20b2aa;
+  color: white;
+}
+
+.indicador-notificacion-categoria {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-left: 8px;
+  background: #ff3030;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.contenido-notificaciones {
+  padding: 20px 0;
+}
+
+.tarjeta-notificacion {
+  padding: 18px;
+  margin-bottom: 15px;
+  border: 1px solid #d8e5e5;
+  border-radius: 10px;
+  background: white;
+}
+
+.tarjeta-notificacion h3 {
+  margin-top: 0;
+  color: #208f8a;
+}
+
+.tarjeta-notificacion small {
+  display: block;
+  margin-top: 12px;
+  color: #777;
+}

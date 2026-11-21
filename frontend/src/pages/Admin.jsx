@@ -112,6 +112,43 @@ async function actualizarMensaje(id, cambios) {
   }
 }
 
+async function marcarRespuestasComoLeidas(id) {
+  try {
+    const respuesta = await fetch(
+      `http://localhost:3000/api/admin/mensajes/${id}/estado`,
+      {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          marcarRespuestasLeidas: true
+        })
+      }
+    )
+
+    const datos = await respuesta.json()
+
+    if (!respuesta.ok) {
+      throw new Error(
+        datos.mensaje || 'No se pudieron marcar las respuestas como leídas.'
+      )
+    }
+
+    setMensajes(actuales =>
+      actuales.map(mensaje =>
+        mensaje.id === id
+          ? { ...mensaje, ...datos.mensajeActualizado }
+          : mensaje
+      )
+    )
+
+  } catch (error) {
+    alert(error.message)
+  }
+}
+
 const mensajesFiltrados = mensajes.filter(mensaje =>
   bandejaActiva === 'archivados'
     ? mensaje.archivado === true
@@ -395,14 +432,41 @@ setMensajes(datosMensajes)
 
     <button
       className="admin-carpeta-boton"
-      onClick={() =>
-        setCarpetaActiva(
-          carpetaActiva === grupo.clave ? null : grupo.clave
-        )
+      onClick={() => {
+  const abrir = carpetaActiva !== grupo.clave
+
+  setCarpetaActiva(abrir ? grupo.clave : null)
+
+  if (abrir) {
+    grupo.mensajes.forEach(mensaje => {
+      const tienePendientes = (mensaje.respuestas || []).some(
+        respuesta =>
+          respuesta.remitente === 'usuario' &&
+          respuesta.leidaPorAdmin === false
+      )
+
+      if (tienePendientes) {
+        marcarRespuestasComoLeidas(mensaje.id)
       }
+    })
+  }
+}}
     >
       📁 {grupo.nombre} — {grupo.mensajes.length} mensaje(s)
-      {carpetaActiva === grupo.clave ? ' ▲' : ' ▼'}
+
+{grupo.mensajes.some(mensaje =>
+  (mensaje.respuestas || []).some(respuesta =>
+    respuesta.remitente === 'usuario' &&
+    respuesta.leidaPorAdmin === false
+  )
+) && (
+  <span
+    className="admin-esferita-roja"
+    aria-label="Respuestas nuevas"
+  />
+)}
+
+{carpetaActiva === grupo.clave ? ' ▲' : ' ▼'}
     </button>
 
     {carpetaActiva === grupo.clave && (

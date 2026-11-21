@@ -964,3 +964,23 @@ body {
   color: #168f91;
   font-size: 22px;
 }
+
+.indicador-notificacion-home {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-left: 7px;
+  background-color: #ff3030;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.indicador-notificacion-home {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-left: 8px;
+  background-color: #ff3030;
+  border-radius: 50%;
+  vertical-align: middle;
+}
