@@ -558,10 +558,41 @@ setHistoriaEnEdicionId(null)
   {/* Decoración turquesa */}
   <div className="barra-explorar"></div>
 
+  <nav className="navegacion-explorar">
+  <button onClick={() => {
+    setMostrarBuscador(true);
+    document.getElementById("area-buscador")?.scrollIntoView({ behavior: "smooth" });
+  }}>
+    BUSCADOR
+  </button>
+
+  {usuarioActual && (
+    <>
+      <button onClick={() => document.getElementById("sigue-leyendo")?.scrollIntoView({ behavior: "smooth" })}>
+        SIGUE LEYENDO
+      </button>
+
+      <button onClick={() => document.getElementById("recomendado")?.scrollIntoView({ behavior: "smooth" })}>
+        RECOMENDADO PARA TI
+      </button>
+    </>
+  )}
+
+  <button onClick={() => document.getElementById("populares")?.scrollIntoView({ behavior: "smooth" })}>
+    HISTORIAS POPULARES
+  </button>
+
+  <button onClick={() => document.getElementById("ofertas")?.scrollIntoView({ behavior: "smooth" })}>
+    OFERTAS
+  </button>
+
+  <button onClick={() => document.getElementById("contacto")?.scrollIntoView({ behavior: "smooth" })}>
+    CONTACTO
+  </button>
+</nav>
+
   {/* Botón para abrir el buscador */}
-  <button
-    type="button"
-    className="boton-abrir-buscador"
+  <button id="area-buscador" className="boton-abrir-buscador"
     onClick={() => setMostrarBuscador(!mostrarBuscador)}
   >
     {mostrarBuscador ? "CERRAR BUSCADOR" : "EXPLORAR HISTORIAS ✨"}
@@ -569,7 +600,7 @@ setHistoriaEnEdicionId(null)
 
   {/* BUSCADOR */}
   {mostrarBuscador && (
-    <div className="buscador-explorar">
+    <div className="buscador-explorar" id="buscador">
 
       <input
         type="text"
@@ -632,17 +663,23 @@ setHistoriaEnEdicionId(null)
   {/* SIGUE LEYENDO */}
   {usuarioActual && (
   <>
-    <SigueLeyendo />
+    <div id="sigue-leyendo">
+  <SigueLeyendo />
+</div>
 
-    <RecomendadoParaTi />
+   <div id="recomendado">
+  <RecomendadoParaTi />
+</div>
   </>
 )}
 
 {/* HISTORIAS POPULARES */}
-<HistoriasPopulares />
+<div id="populares">
+  <HistoriasPopulares />
+</div>
 
   {/* OFERTAS */}
-  <div className="seccion-ofertas">
+  <div className="seccion-ofertas" id="ofertas">
   <h2>Ofertas en historias de paga ✨</h2>
 
   <p className="texto-ofertas">
@@ -677,12 +714,59 @@ setHistoriaEnEdicionId(null)
   <p className="aviso-ofertas">
     *Promociones ilustrativas de demostración. No representan descuentos activos.
   </p>
+
+
+
+<article className="tarjeta-oferta tarjeta-monetizacion">
+  <img
+    src="/Historia%20pagada.png"
+    alt="Libro, pluma y monedas"
+    className="imagen-monetizacion"
+  />
+
+  <div className="contenido-monetizacion">
+    <span className="etiqueta-oferta">Historias pagadas ✍️</span>
+    <h3>¿Tu sueño es ganar dinero como escritor?</h3>
+    <p>
+      ¡Trabajemos juntos! Convierte tus historias originales
+      en proyectos de pago y permite que tus lectores apoyen tu talento.
+    </p>
+    <span className="etiqueta-oferta">
+      Ve a Mi Consola y crea historias pagadas.
+    </span>
+  </div>
+</article>
+
+<article className="tarjeta-oferta tarjeta-monetizacion">
+  <img
+    src="/Historia%20con%20anuncios.png"
+    alt="Pantalla de anuncios y monedas"
+    className="imagen-monetizacion"
+  />
+
+  <div className="contenido-monetizacion">
+    <span className="etiqueta-oferta">Historias con anuncios ⭐</span>
+    <h3>¿Quieres generar ingresos de otra manera?</h3>
+    <p>
+      ¿Prefieres no depender de historias pagadas?
+      Prueba permitir anuncios en tus historias y descubre
+      otra forma de monetizar tus creaciones.
+    </p>
+    <span className="etiqueta-oferta">
+      Explora las opciones de monetización.
+    </span>
+  </div>
+</article>
+
+
 </div>
 
 </section>
 
 {/* FORMULARIO DE CONTACTO */}
-<Contacto usuario={usuarioActual} />
+<div id="contacto">
+  <Contacto usuario={usuarioActual} />
+</div>
 
 <footer className="pie-loreai">
   2026 LoreAI · Encontramos la estrella y la ayudamos a brillar.
@@ -710,18 +794,20 @@ setHistoriaEnEdicionId(null)
 
 
 {/* ASISTENTE LORE-CHAN */}
-<div className={mostrarAcceso || bienvenidaActiva ? 'chat-bloqueado' : ''}>
-  <LoreChat
-    usuario={usuarioActual}
-    historiaId={mostrarEditorHistoria ? historiaEnEdicionId : null}
-    pantalla={
-      mostrarCrearHistoria ? 'crear' :
-      mostrarConsola ? 'consola' :
-      mostrarPerfil ? 'perfil' :
-      'inicio'
-    }
-  />
-</div>
+{!mostrarAdmin && (
+  <div className={mostrarAcceso || bienvenidaActiva ? 'chat-bloqueado' : ''}>
+    <LoreChat
+      usuario={usuarioActual}
+      historiaId={mostrarEditorHistoria ? historiaEnEdicionId : null}
+      pantalla={
+        mostrarCrearHistoria ? 'crear' :
+        mostrarConsola ? 'consola' :
+        mostrarPerfil ? 'perfil' :
+        'inicio'
+      }
+    />
+  </div>
+)}
   </>
   )
 }
