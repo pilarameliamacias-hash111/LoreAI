@@ -49,6 +49,7 @@ const [mostrarPerfilPublico, setMostrarPerfilPublico] = useState(false)
 const [usuarioPerfilPublicoId, setUsuarioPerfilPublicoId] = useState(null)
 const [errorVideo, setErrorVideo] = useState(false)
 const [usuarioActual, setUsuarioActual] = useState(null)
+const [notificacionesSinLeer, setNotificacionesSinLeer] = useState([])
 const [comprobandoSesion, setComprobandoSesion] = useState(true)
 const [mostrarCrearCapitulo, setMostrarCrearCapitulo] = useState(false)
 const [capituloEnEdicionId, setCapituloEnEdicionId] = useState(null)
@@ -78,6 +79,7 @@ const [mostrarPerfil, setMostrarPerfil] = useState(
     }
 
     setUsuarioActual(null)
+    setNotificacionesSinLeer([])
     setMostrarPerfil(false)
     setMostrarPerfilPublico(false)
     setMostrarLector(false)
@@ -137,8 +139,84 @@ useEffect(() => {
   comprobarSesion()
 }, [])
 
+async function marcarNotificacionesComoLeidas() {
+  try {
+    const respuesta = await fetch(
+      'http://localhost:3000/api/notificaciones/leer',
+      {
+        method: 'PATCH',
+        credentials: 'include'
+      }
+    )
+
+    if (!respuesta.ok) {
+      throw new Error('No se pudieron marcar las notificaciones como leídas.')
+    }
+
+    setNotificacionesSinLeer(prev =>
+  prev.map(notificacion => ({
+    ...notificacion,
+    leida: true
+  }))
+)
+
+  } catch (error) {
+    console.error('Error al marcar notificaciones:', error)
+  }
+}
+
+useEffect(() => {
+  if (!usuarioActual) {
+    setNotificacionesSinLeer([])
+    return
+  }
+
+  let activo = true
+
+  async function cargarNotificaciones() {
+    try {
+      const respuesta = await fetch(
+        'http://localhost:3000/api/notificaciones',
+        {
+          credentials: 'include',
+          cache: 'no-store'
+        }
+      )
+
+      if (!respuesta.ok) {
+        throw new Error('No se pudieron cargar las notificaciones.')
+      }
+
+      const datos = await respuesta.json()
+
+      if (activo) {
+        setNotificacionesSinLeer(datos)
+      }
+
+    } catch (error) {
+      console.error('Error al cargar notificaciones:', error)
+    }
+  }
+
+  cargarNotificaciones()
+
+  const intervalo = setInterval(cargarNotificaciones, 5000)
+
+  return () => {
+    activo = false
+    clearInterval(intervalo)
+  }
+
+}, [usuarioActual])
+
 console.log('Usuario actual:', usuarioActual)
 console.log('Comprobando sesión:', comprobandoSesion)
+console.log('Estado de notificaciones:', notificacionesSinLeer)
+ console.log(
+  '¿Debe aparecer el indicador?',
+  notificacionesSinLeer.some(notificacion => !notificacion.leida)
+)
+
 
   return (
   <>
@@ -192,6 +270,8 @@ console.log('Comprobando sesión:', comprobandoSesion)
 
   <Perfil
     usuario={usuarioActual}
+    notificacionesSinLeer={notificacionesSinLeer}
+        alLeerNotificaciones={marcarNotificacionesComoLeidas}
     alVolver={() => {
   setMostrarPerfil(false)
 
@@ -374,7 +454,17 @@ setHistoriaEnEdicionId(null)
   onClick={abrirAcceso}
   disabled={comprobandoSesion}
 >
-  {usuarioActual ? 'MI PERFIL' : 'INICIAR SESIÓN'}
+  {usuarioActual ? (
+    <>
+      MI PERFIL
+
+      {notificacionesSinLeer?.some(notificacion => !notificacion.leida) && (
+  <span className="indicador-notificacion-home" />
+)}
+    </>
+  ) : (
+    'INICIAR SESIÓN'
+  )}
 </button>
 
 {usuarioActual?.rol === 'admin' && (

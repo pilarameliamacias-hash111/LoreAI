@@ -23,6 +23,8 @@ const meses = [
 
 function Perfil({
   usuario,
+  notificacionesSinLeer,
+  alLeerNotificaciones,
   alVolver,
   alActualizarUsuario,
   alCerrarSesion,
@@ -30,6 +32,8 @@ function Perfil({
   alEditarHistoria
 }) {
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false)
+  const [vistaActual, setVistaActual] = useState('perfil')
+const [categoriaNotificaciones, setCategoriaNotificaciones] = useState('sistema')
   const [descripcionExpandida, setDescripcionExpandida] = useState(true)
   const [editando, setEditando] = useState(false)
   const [guardando, setGuardando] = useState(false)
@@ -330,15 +334,24 @@ setPortadaPerfil(usuario.portadaPerfil || '')
   className="boton-menu-perfil"
   onClick={() => setMenuPerfilAbierto(!menuPerfilAbierto)}
 >
-  {usuario?.fotoPerfil ? (
-    <img
-      src={usuario.fotoPerfil}
-      alt="Foto de perfil"
-      className="avatar-pequeno avatar-pequeno-imagen"
-    />
-  ) : (
-    <span className="avatar-pequeno">✦</span>
-  )}
+  <span className="avatar-con-notificacion">
+    {usuario?.fotoPerfil ? (
+      <img
+        src={usuario.fotoPerfil}
+        alt="Foto de perfil"
+        className="avatar-pequeno avatar-pequeno-imagen"
+      />
+    ) : (
+      <span className="avatar-pequeno">✦</span>
+    )}
+
+    {notificacionesSinLeer?.some(notificacion => !notificacion.leida) && (
+  <span
+    className="indicador-notificacion"
+    aria-label="Tienes notificaciones sin leer"
+  />
+)}
+  </span>
 
   {nombreVisible}
   <span>⌄</span>
@@ -364,18 +377,146 @@ setPortadaPerfil(usuario.portadaPerfil || '')
   if (opcion === 'Finalizar sesión') {
     alCerrarSesion()
   }
+  if (opcion === 'Notificaciones') {
+  setVistaActual('notificaciones')
+}
 }}
   >
-    {opcion}
-  </button>
+  {opcion}
+
+  {opcion === 'Notificaciones' &&
+  notificacionesSinLeer?.some(notificacion => !notificacion.leida) && (
+    <span className="indicador-notificacion-menu" />
+  )}
+</button>
 ))}
               </div>
             )}
           </div>
         </nav>
-      </header>
+          </header>
 
-      <section className="portada-perfil">
+{vistaActual === 'notificaciones' ? (
+  <section className="pagina-notificaciones">
+
+  <h1>Notificaciones</h1>
+
+  <nav className="categorias-notificaciones">
+
+  <button
+    className={categoriaNotificaciones === 'entrada' ? 'categoria-activa' : ''}
+    onClick={() => {
+      if (categoriaNotificaciones === 'sistema') {
+        alLeerNotificaciones()
+      }
+      setCategoriaNotificaciones('entrada')
+    }}
+  >
+    Bandeja de entrada
+  </button>
+
+  <button
+    className={categoriaNotificaciones === 'actualizaciones' ? 'categoria-activa' : ''}
+    onClick={() => {
+      if (categoriaNotificaciones === 'sistema') {
+        alLeerNotificaciones()
+      }
+      setCategoriaNotificaciones('actualizaciones')
+    }}
+  >
+    Actualizaciones
+  </button>
+
+  <button
+    className={categoriaNotificaciones === 'sistema' ? 'categoria-activa' : ''}
+    onClick={() => {
+      setCategoriaNotificaciones('sistema')
+      alLeerNotificaciones()
+    }}
+  >
+    Notificaciones de sistema
+
+    {notificacionesSinLeer?.some(notificacion => !notificacion.leida) && (
+      <span className="indicador-notificacion-categoria" />
+    )}
+  </button>
+
+  <button
+    className={categoriaNotificaciones === 'comunidad' ? 'categoria-activa' : ''}
+    onClick={() => {
+      if (categoriaNotificaciones === 'sistema') {
+        alLeerNotificaciones()
+      }
+      setCategoriaNotificaciones('comunidad')
+    }}
+  >
+    Notificaciones de comunidad
+  </button>
+
+</nav>
+  <div className="contenido-notificaciones">
+
+    {categoriaNotificaciones === 'entrada' && (
+      <p>Tu bandeja de entrada aparecerá aquí.</p>
+    )}
+
+    {categoriaNotificaciones === 'actualizaciones' && (
+      <p>Aquí aparecerán las actualizaciones de las historias que sigues.</p>
+    )}
+
+    {categoriaNotificaciones === 'sistema' && (
+      <div>
+        <h2>Notificaciones de sistema</h2>
+
+        {notificacionesSinLeer?.length > 0 ? (
+          notificacionesSinLeer.map(notificacion => (
+            <article key={notificacion.id} className="tarjeta-notificacion">
+  <h3>{notificacion.titulo}</h3>
+
+  {notificacion.conversacion ? (
+    <>
+      <div className="mensaje-original">
+        <h4>Tu mensaje</h4>
+        <p>{notificacion.conversacion.mensaje}</p>
+        <small>
+          {new Date(notificacion.conversacion.fechaMensaje).toLocaleString()}
+        </small>
+      </div>
+
+      <div className="respuestas-notificacion">
+        <h4>Respuesta del equipo LoreAI</h4>
+
+        {notificacion.conversacion.respuestas.map(respuesta => (
+          <div key={respuesta.id} className="respuesta-notificacion">
+            <p>{respuesta.respuesta}</p>
+            <small>
+              {new Date(respuesta.fecha).toLocaleString()}
+            </small>
+          </div>
+        ))}
+      </div>
+    </>
+  ) : (
+    <p>{notificacion.contenido}</p>
+  )}
+</article>
+          ))
+        ) : (
+          <p>No tienes notificaciones nuevas.</p>
+        )}
+      </div>
+    )}
+
+    {categoriaNotificaciones === 'comunidad' && (
+      <p>Aquí aparecerán los comentarios y respuestas de la comunidad.</p>
+    )}
+
+  </div>
+
+</section>
+    ) : (
+      <>
+        <section className="portada-perfil">
   <div className="imagen-portada-perfil">
     {usuario.portadaPerfil ? (
       <img
@@ -845,7 +986,8 @@ setPortadaPerfil(usuario.portadaPerfil || '')
     }}
   />
 )}
-
+      </>
+    )}
 <footer className="footer-perfil">
   2026 LoreAI · Encontramos la estrella y la ayudamos a brillar.
 </footer>
